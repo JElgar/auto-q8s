@@ -1,37 +1,125 @@
 """An AWS Python Pulumi program"""
 
+from pathlib import Path
+
 import pulumi
-from pulumi_aws import s3
 import pulumi_aws as aws
+from pulumi_aws.ec2.key_pair import KeyPair
+from pulumi_aws.ec2.security_group import SecurityGroup
 
-number_of_master_nodes = 3
+# https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
+install_kubeadm = """
+#!/bin/bash
 
-ubuntu = aws.ec2.get_ami(
-    most_recent=True,
-    filters=[
-        aws.ec2.GetAmiFilterArgs(
-            name="name",
-            values=["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"],
-        ),
-        aws.ec2.GetAmiFilterArgs(
-            name="virtualization-type",
-            values=["hvm"],
-        ),
-    ],
-    owners=["099720109477"],
-)
+sudo apt-get update -y
+sudo apt-get install -y ec2-instance-connect
 
-for i in range(number_of_master_nodes):
+cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
+br_netfilter
+EOF
+
+cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+EOF
+sudo sysctl --system
+
+sudo apt-get install -y containerd
+
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl
+
+sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+sudo apt-get update -y
+sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+"""
+
+
+def get_ubuntu_ami() -> str:
+    return aws.ec2.get_ami(
+        most_recent=True,
+        filters=[
+            aws.ec2.GetAmiFilterArgs(
+                name="name",
+                values=["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"],
+            ),
+            aws.ec2.GetAmiFilterArgs(
+                name="virtualization-type",
+                values=["hvm"],
+            ),
+        ],
+        owners=["099720109477"],
+    ).id
+
+
+def create_key():
+    homedir = str(Path.home())
+    sshkey_path = f"{homedir}/.ssh/id_rsa.pub"
+    sshkey_file = open(sshkey_path, "r")
+    return aws.ec2.KeyPair(
+        f"{pulumi.get_stack()}_key", public_key=sshkey_file.read().strip("\n")
+    )
+
+
+def create_node(
+    name: str, ami: str, ssh_key: KeyPair, security_group: SecurityGroup
+) -> None:
     instance = aws.ec2.Instance(
-        f"web_{i}",
-        ami=ubuntu.id,
+        name,
+        ami=ami,
         instance_type="t2.micro",
+        user_data=install_kubeadm,
         tags={
             "stack": pulumi.get_stack(),
-            "Name": f"web_{i}",
+            "Name": name,
         },
+        key_name=ssh_key.key_name,
+        vpc_security_group_ids=[security_group.id],
     )
 
     # Export server details
-    pulumi.export(f"master_{i}_arn", instance.arn)
-    pulumi.export(f"master_{i}_ip", instance.public_ip)
+    pulumi.export(f"{name}_arn", instance.arn)
+    pulumi.export(f"{name}_ip", instance.public_ip)
+
+
+def create_security_group():
+    group = aws.ec2.SecurityGroup(
+        f"{pulumi.get_stack()}_master_node_security_group",
+        description="Enable all tcp access",
+        ingress=[
+            aws.ec2.SecurityGroupIngressArgs(
+                protocol="tcp",
+                from_port=0,
+                to_port=65535,
+                cidr_blocks=["0.0.0.0/0"],
+            )
+        ],
+        egress=[
+            aws.ec2.SecurityGroupEgressArgs(
+                protocol="tcp",
+                from_port=0,
+                to_port=65535,
+                cidr_blocks=["0.0.0.0/0"],
+            )
+        ],
+    )
+    return group
+
+
+def create_master_nodes(number_of_master_nodes: int) -> None:
+    ubuntu_ami = get_ubuntu_ami()
+    key = create_key()
+    security_group = create_security_group()
+    for i in range(number_of_master_nodes):
+        create_node(
+            name=f"master_node_{i}",
+            ami=ubuntu_ami,
+            ssh_key=key,
+            security_group=security_group,
+        )
+
+
+create_master_nodes(1)
