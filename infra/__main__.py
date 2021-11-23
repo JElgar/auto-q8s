@@ -7,6 +7,8 @@ import pulumi_aws as aws
 from pulumi_aws.ec2.key_pair import KeyPair
 from pulumi_aws.ec2.security_group import SecurityGroup
 
+import constants
+
 # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
 install_kubeadm = """
 #!/bin/bash
@@ -66,7 +68,7 @@ def create_key():
 
 def create_node(
     name: str, ami: str, ssh_key: KeyPair, security_group: SecurityGroup
-) -> None:
+) -> aws.ec2.Instance:
     instance = aws.ec2.Instance(
         name,
         ami=ami,
@@ -83,6 +85,8 @@ def create_node(
     # Export server details
     pulumi.export(f"{name}_arn", instance.arn)
     pulumi.export(f"{name}_ip", instance.public_ip)
+
+    return instance
 
 
 def create_security_group():
@@ -113,13 +117,15 @@ def create_master_nodes(number_of_master_nodes: int) -> None:
     ubuntu_ami = get_ubuntu_ami()
     key = create_key()
     security_group = create_security_group()
-    for i in range(number_of_master_nodes):
+    nodes = [
         create_node(
-            name=f"master_node_{i}",
+            name=f"{constants.master_node_name_prefix}_{i}",
             ami=ubuntu_ami,
             ssh_key=key,
             security_group=security_group,
         )
+        for i in range(number_of_master_nodes)
+    ]
 
 
-create_master_nodes(1)
+create_master_nodes(constants.number_of_master_nodes)
