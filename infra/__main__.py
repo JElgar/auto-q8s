@@ -6,6 +6,7 @@ import pulumi
 import pulumi_aws as aws
 from pulumi_aws.ec2.key_pair import KeyPair
 from pulumi_aws.ec2.security_group import SecurityGroup
+import pulumi_hetzner as hcloud
 
 import constants
 
@@ -28,7 +29,7 @@ sudo sysctl --system
 
 sudo apt-get install -y containerd
 
-sudo apt-get update
+sudo apt-get update -y
 sudo apt-get install -y apt-transport-https ca-certificates curl
 
 sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
@@ -38,6 +39,10 @@ sudo apt-get update -y
 sudo apt-get install -y kubelet kubeadm kubectl
 sudo apt-mark hold kubelet kubeadm kubectl
 """
+
+
+def create_dns_entries():
+
 
 
 def get_ubuntu_ami() -> str:
