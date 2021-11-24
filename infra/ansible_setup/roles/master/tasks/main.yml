@@ -1,0 +1,80 @@
+- name: Variable stuff
+  include_vars:
+    file: infra.yml
+    name: infra
+
+- name: Get ec2 instance connect
+  apt:
+    update_cache: yes
+    force_apt_get: yes
+    name:
+      - ec2-instance-connect
+
+- name: Some stuff
+  shell: |
+    cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
+    br_netfilter
+    EOF
+
+- name: Some more stuff
+  shell: |
+    cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+    net.bridge.bridge-nf-call-ip6tables = 1
+    net.bridge.bridge-nf-call-iptables = 1
+    EOF
+
+- name: Even more stuff
+  shell: sysctl --system
+
+- name: Get more stuff
+  apt:
+    update_cache: yes
+    force_apt_get: yes
+    name:
+      - containerd
+      - apt-transport-https
+      - ca-certificates
+      - curl
+
+- name: yet more stuff
+  shell: curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+
+- name: I literally cannot believe how much stuff we're doing
+  shell: echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+- name: Get kube stuff
+  apt:
+    update_cache: yes
+    force_apt_get: yes
+    name:
+      - kubelet
+      - kubeadm
+      - kubectl
+
+- name: Hold kubelet
+  dpkg_selections:
+    name: kubelet
+    selection: hold
+
+- name: Hold kubeadm
+  dpkg_selections:
+    name: kubeadm
+    selection: hold
+
+- name: Hold kubectl
+  dpkg_selections:
+    name: kubectl
+    selection: hold
+
+- name: final piece of stuff
+  shell: echo 1 > /proc/sys/net/ipv4/ip_forward
+
+- name: RESET
+  shell: kubeadm reset
+
+- name: INITIALISE
+  shell: kubeadm init --pod-network-cidr=192.168.0.0/16 --control-plane-endpoint={{control_plane_endpoint}}
+
+
+
+
