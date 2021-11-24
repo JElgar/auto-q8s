@@ -41,10 +41,6 @@ sudo apt-mark hold kubelet kubeadm kubectl
 """
 
 
-def create_dns_entries():
-
-
-
 def get_ubuntu_ami() -> str:
     return aws.ec2.get_ami(
         most_recent=True,
