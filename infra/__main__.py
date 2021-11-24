@@ -6,7 +6,6 @@ import pulumi
 import pulumi_aws as aws
 from pulumi_aws.ec2.key_pair import KeyPair
 from pulumi_aws.ec2.security_group import SecurityGroup
-import pulumi_hetzner as hcloud
 
 import constants
 
