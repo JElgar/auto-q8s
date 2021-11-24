@@ -6,6 +6,7 @@ import pulumi
 import pulumi_aws as aws
 from pulumi_aws.ec2.key_pair import KeyPair
 from pulumi_aws.ec2.security_group import SecurityGroup
+import pulumi_cloudflare as cloudflare
 
 import constants
 
@@ -113,19 +114,32 @@ def create_security_group():
     return group
 
 
+def create_dns_record(name: str, target) -> cloudflare.Record:
+    return cloudflare.Record(
+        name,
+        zone_id=constants.zone_id,
+        name=name,
+        value=target,
+        type="A",
+        ttl=3600,
+    )
+
+
 def create_master_nodes(number_of_master_nodes: int) -> None:
     ubuntu_ami = get_ubuntu_ami()
     key = create_key()
     security_group = create_security_group()
-    nodes = [
-        create_node(
+
+    k8s_subdomain = f"k8s.{pulumi.get_stack()}"
+    pulumi.export("control_plane_endpoint", k8s_subdomain)
+    for i in range(number_of_master_nodes):
+        node = create_node(
             name=f"{constants.master_node_name_prefix}_{i}",
             ami=ubuntu_ami,
             ssh_key=key,
             security_group=security_group,
         )
-        for i in range(number_of_master_nodes)
-    ]
+        create_dns_record(k8s_subdomain, node.public_ip)
 
 
 create_master_nodes(constants.number_of_master_nodes)

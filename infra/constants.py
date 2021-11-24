@@ -1,2 +1,5 @@
 number_of_master_nodes = 1
 master_node_name_prefix = "master_node"
+
+zone_id = "a09cd1611a7c84da12843d795331d0e4"
+zone_domain = "joebryan.uk"
