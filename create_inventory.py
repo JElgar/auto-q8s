@@ -18,7 +18,9 @@ def write_ansible_config(inventory: dict, ansible_dir: str):
 
 def write_ansible_variables(control_plane_subdomain, ansible_dir: str):
     data = {
-        "control_plane_endpoint": f"{control_plane_subdomain}.{constants.zone_domain}"
+        "infra": {
+            "control_plane_endpoint": f"{control_plane_subdomain}.{constants.zone_domain}"
+        }
     }
 
     with open(f"{ansible_dir}/infra.yml", "w") as file:
