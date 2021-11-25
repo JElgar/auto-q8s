@@ -34,7 +34,13 @@ def main(pulumi_state, ansible_dir):
         data[f"{constants.master_node_name_prefix}_{i}_ip"]
         for i in range(constants.number_of_master_nodes)
     ]
-    write_ansible_config({"master_nodes": ips}, ansible_dir)
+    write_ansible_config(
+        {
+            "master_init_node": ips.pop(0),
+            "master_join_nodes": ips,
+        },
+        ansible_dir,
+    )
     write_ansible_variables(data["control_plane_endpoint"], ansible_dir)
 
 
