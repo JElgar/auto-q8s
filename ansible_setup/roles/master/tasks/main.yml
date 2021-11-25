@@ -70,6 +70,11 @@
 - name: INITIALISE
   shell: "kubeadm init --pod-network-cidr=192.168.0.0/16 --control-plane-endpoint={{ control_plane_endpoint }}"
 
+- name: Copy Conf
+  fetch:
+    src: /etc/kubernetes/admin.conf
+    dest: ~/.kube/config
+    flat: yes
 
 
 
