@@ -1,0 +1,2 @@
+- name: Execute join command
+  shell: "{{ join_command }}"
