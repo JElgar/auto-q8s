@@ -11,36 +11,6 @@ import pulumi_google_native as gcp
 
 import constants
 
-# https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
-install_kubeadm = """
-#!/bin/bash
-
-sudo apt-get update -y
-sudo apt-get install -y ec2-instance-connect
-
-cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
-br_netfilter
-EOF
-
-cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
-net.bridge.bridge-nf-call-ip6tables = 1
-net.bridge.bridge-nf-call-iptables = 1
-EOF
-sudo sysctl --system
-
-sudo apt-get install -y containerd
-
-sudo apt-get update -y
-sudo apt-get install -y apt-transport-https ca-certificates curl
-
-sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
-echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
-
-sudo apt-get update -y
-sudo apt-get install -y kubelet kubeadm kubectl
-sudo apt-mark hold kubelet kubeadm kubectl
-"""
-
 
 def get_ubuntu_ami() -> str:
     return aws.ec2.get_ami(
@@ -75,7 +45,6 @@ def create_node(
         name,
         ami=ami,
         instance_type="t2.medium",
-        user_data=install_kubeadm,
         tags={
             "stack": pulumi.get_stack(),
             "Name": name,
@@ -115,9 +84,9 @@ def create_security_group():
     return group
 
 
-def create_dns_record(name: str, target) -> cloudflare.Record:
+def create_dns_record(resource_name: str, name: str, target) -> cloudflare.Record:
     return cloudflare.Record(
-        name,
+        resource_name,
         zone_id=constants.zone_id,
         name=name,
         value=target,
@@ -140,7 +109,7 @@ def create_master_nodes(number_of_master_nodes: int) -> None:
             ssh_key=key,
             security_group=security_group,
         )
-        create_dns_record(k8s_subdomain, node.public_ip)
+        create_dns_record(f"{k8s_subdomain}_{i}", k8s_subdomain, node.public_ip)
 
 
 create_master_nodes(constants.number_of_master_nodes)
