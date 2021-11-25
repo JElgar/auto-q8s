@@ -7,6 +7,7 @@ import pulumi_aws as aws
 from pulumi_aws.ec2.key_pair import KeyPair
 from pulumi_aws.ec2.security_group import SecurityGroup
 import pulumi_cloudflare as cloudflare
+import pulumi_google_native as gcp
 
 import constants
 
