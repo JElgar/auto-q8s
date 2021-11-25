@@ -70,14 +70,5 @@
 - name: thing
   shell: modprobe br_netfilter & echo 1 > /proc/sys/net/bridge/bridge-nf-call-iptables & echo 1 > /proc/sys/net/bridge/bridge-nf-call-ip6tables & sudo sysctl -p
 
-- name: INITIALISE
-  shell: "kubeadm init --pod-network-cidr=192.168.0.0/16 --control-plane-endpoint={{ control_plane_endpoint }}"
-
-- name: Copy Conf
-  fetch:
-    src: /etc/kubernetes/admin.conf
-    dest: ~/.kube/config
-    flat: yes
-
 
 

@@ -1,7 +1,15 @@
 - name: Provision master node
-  hosts: master_nodes
+  hosts: master_init_node
   become: yes
   become_user: root
   roles:
-    - master
-  
+    - master_setup
+    - master_init
+
+- name: Provision master node
+  hosts: master_join_nodes
+  become: yes
+  become_user: root
+  roles:
+    - master_setup
+    -
