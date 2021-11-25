@@ -73,7 +73,7 @@ def create_node(
     instance = aws.ec2.Instance(
         name,
         ami=ami,
-        instance_type="t2.micro",
+        instance_type="t2.medium",
         user_data=install_kubeadm,
         tags={
             "stack": pulumi.get_stack(),
