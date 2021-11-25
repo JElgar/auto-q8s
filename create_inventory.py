@@ -36,7 +36,7 @@ def main(pulumi_state, ansible_dir):
     ]
     write_ansible_config(
         {
-            "master_init_node": ips.pop(0),
+            "master_init_node": [ips.pop(0)],
             "master_join_nodes": ips,
         },
         ansible_dir,
