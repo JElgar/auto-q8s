@@ -1,2 +1,6 @@
+- name: print facts
+  ansible.builtin.debug:
+    var: ansible_facts
+
 - name: Execute join command
   shell: "{{ join_command }}"
