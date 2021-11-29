@@ -1,6 +1,6 @@
-- name: print facts
-  ansible.builtin.debug:
-    var: ansible_facts
+- name:
+  debug:
+    msg: "[Worker] K8S_TOKEN_HOLDER K8S token is {{ hostvars['K8S_TOKEN_HOLDER']['join_command'] }}"
 
 - name: Execute join command
-  shell: "{{ join_command }}"
+  shell: "{{ hostvars['K8S_TOKEN_HOLDER']['join_command'] }}"

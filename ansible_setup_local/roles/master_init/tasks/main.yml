@@ -1,0 +1,7 @@
+- name: Create join command
+  shell: echo this is the join command 
+  register: join_command
+
+- name: Export join command to a 'host-fact' type variable
+  set_fact:
+    join_command: "{{ join_command }}"

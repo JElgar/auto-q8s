@@ -109,7 +109,8 @@ def create_master_nodes(number_of_master_nodes: int) -> None:
             ssh_key=key,
             security_group=security_group,
         )
-        create_dns_record(f"{k8s_subdomain}_{i}", k8s_subdomain, node.public_ip)
+        if i == 0:
+            create_dns_record(f"{k8s_subdomain}_{i}", k8s_subdomain, node.public_ip)
 
 
 create_master_nodes(constants.number_of_master_nodes)

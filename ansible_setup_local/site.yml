@@ -13,3 +13,5 @@
   roles:
     - role: master_setup
     - role: master_join
+      vars:
+        join_command: "{{hostvars['master_init_node']['join_command']}}"
