@@ -1,7 +1,0 @@
-- name: Variable stuff
-  include_vars: infra.yml
-
-- name: Some stuff
-  shell: echo Hello
-
-
