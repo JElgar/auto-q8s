@@ -1,3 +1,5 @@
+---
+
 - name: Reset Kubernetes component
   shell: "kubeadm reset --force"
   register: reset_cluster
@@ -6,19 +8,5 @@
   when: reset_cluster is succeeded
   shell: "kubeadm init --pod-network-cidr=192.168.0.0/16 --control-plane-endpoint={{ control_plane_endpoint }}"
   register: init_cluster
-
-- name: Copy Conf
-  when: init_cluster is succeeded
-  fetch:
-    src: /etc/kubernetes/admin.conf
-    dest: ~/.kube/config
-    flat: yes
-
-- name: Create join command
-  shell: kubeadm token create --print-join-command
-  register: join_command
-
-- name: Export join command to a 'host-fact' type variable
-  add_host:
-    name:   "K8S_TOKEN_HOLDER"
-    join_command: "{{ join_command.stdout }}"
+  until: result.stdout.find("Your Kubernetes master has initialized successfully!") != -1
+  retries: 3

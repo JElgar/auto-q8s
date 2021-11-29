@@ -9,3 +9,28 @@
   include_tasks: init.yml
   when: not kubeadm_ca.stat.exists
   run_once: yes
+  register: init_complete
+
+- name: Copy Conf
+  when: init_complete is succeeded
+  fetch:
+    src: /etc/kubernetes/admin.conf
+    dest: ~/.kube/config
+    flat: yes
+
+- name: Create join command
+  shell: kubeadm token create --print-join-command
+  register: join_command
+  retries: 3
+  delay: 5
+  until: join_command is not failed
+
+- name: Get join cert
+  shell: sudo kubeadm init phase upload-certs --upload-certs | tail -1
+  register: join_cert
+
+- name: Export join command
+  add_host:
+    name:   "K8S_DATA"
+    join_command: "{{ join_command.stdout }}"
+    join_cert: "{{ join_cert.stdout }}"

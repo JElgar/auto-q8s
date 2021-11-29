@@ -1,2 +1,0 @@
-[private_ec2_instance]
-master_server ansible_host=3.10.175.183

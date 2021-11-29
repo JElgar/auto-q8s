@@ -1,6 +1,6 @@
 - name:
   debug:
-    msg: "[Worker] K8S_TOKEN_HOLDER K8S token is {{ hostvars['K8S_TOKEN_HOLDER']['join_command'] }}"
+    msg: "JOIN COMMAND: {{ hostvars['K8S_DATA']['join_command'] }} --control-plane --certificate-key {{ hostvars['K8S_DATA']['join_cert'] }}"
 
-- name: Execute join command
-  shell: "{{ hostvars['K8S_TOKEN_HOLDER']['join_command'] }}"
+- name: Join cluster as control plane node
+  shell: "{{ hostvars['K8S_DATA']['join_command'] }} --control-plane --certificate-key {{ hostvars['K8S_DATA']['join_cert'] }}"
