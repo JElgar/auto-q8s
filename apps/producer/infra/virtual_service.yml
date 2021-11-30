@@ -1,13 +1,13 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: bookinfo-rule
+  name: producer-vs
   namespace: default 
 spec:
   hosts:
-  - nginx.jameselgar.com
+  - producer.$CLUSTER_BASE_URL
   gateways:
-  - nginx-gateway
+  - producer-gateway
   http:
   - match:
     - uri:

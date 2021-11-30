@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name:  
-          image: nginx:latest
+          image: ghcr.io/jelgar/auto-q8s/producer:main
           ports:
             - containerPort: 1000

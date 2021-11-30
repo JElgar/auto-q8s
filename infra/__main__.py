@@ -110,6 +110,7 @@ def create_master_nodes(number_of_master_nodes: int) -> None:
         )
         if i == 0:
             create_dns_record(f"{k8s_subdomain}_{i}", k8s_subdomain, node.public_ip)
+            create_dns_record("producer_endpoint", "producer", node.public_ip)
 
 
 pulumi.export("base_url", f"{pulumi.get_stack()}.{constants.zone_domain}")
