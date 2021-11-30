@@ -26,7 +26,7 @@ jobs:
       with:
         context: apps 
         file: apps/consumer/Dockerfile
-        tag: q8s-consumer:latest
+        tags: q8s-consumer:latest
         push: true
         
     - name: Build and push producer docker image
@@ -34,6 +34,6 @@ jobs:
       with:
         context: apps 
         file: apps/producer/Dockerfile
-        tag: q8s-producer:latest
+        tags: q8s-producer:latest
         push: true
 
