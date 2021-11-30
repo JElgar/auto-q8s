@@ -3,6 +3,8 @@ name: Docker build and push
 on:
   push:
     branches: [ main ]
+    paths:
+    - 'apps/**'
 
     
 env:
