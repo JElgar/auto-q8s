@@ -8,5 +8,3 @@
   when: reset_cluster is succeeded
   shell: "kubeadm init --pod-network-cidr=192.168.0.0/16 --control-plane-endpoint={{ control_plane_endpoint }}"
   register: init_cluster
-  until: result.stdout.find("Your Kubernetes master has initialized successfully!") != -1
-  retries: 3
