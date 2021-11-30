@@ -1,0 +1,20 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: bookinfo-rule
+  namespace: default 
+spec:
+  hosts:
+  - nginx.jameselgar.com
+  gateways:
+  - nginx-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host:  producer-service
+        port:
+          number:
+            1000
