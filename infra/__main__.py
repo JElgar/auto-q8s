@@ -7,7 +7,6 @@ import pulumi_aws as aws
 from pulumi_aws.ec2.key_pair import KeyPair
 from pulumi_aws.ec2.security_group import SecurityGroup
 import pulumi_cloudflare as cloudflare
-import pulumi_google_native as gcp
 
 import constants
 
@@ -101,7 +100,7 @@ def create_master_nodes(number_of_master_nodes: int) -> None:
     security_group = create_security_group()
 
     k8s_subdomain = f"k8s.{pulumi.get_stack()}"
-    pulumi.export("control_plane_endpoint", k8s_subdomain)
+    pulumi.export("control_plane_endpoint", f"{k8s_subdomain}.{constants.zone_domain}")
     for i in range(number_of_master_nodes):
         node = create_node(
             name=f"{constants.master_node_name_prefix}_{i}",
@@ -113,4 +112,5 @@ def create_master_nodes(number_of_master_nodes: int) -> None:
             create_dns_record(f"{k8s_subdomain}_{i}", k8s_subdomain, node.public_ip)
 
 
+pulumi.export("base_url", f"{pulumi.get_stack()}.{constants.zone_domain}")
 create_master_nodes(constants.number_of_master_nodes)
