@@ -5,13 +5,19 @@ on:
     branches: [ main ]
     paths:
     - 'apps/**'
+
     
 env:
   REGISTRY: ghcr.io
+  REPO_NAME: ${{ github.repository }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      
     steps:
     - uses: actions/checkout@v2
         
@@ -21,20 +27,34 @@ jobs:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
+      
+    - name: Extract metadata (tags, labels) for consumer
+      id: consumer-meta
+      uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/consumer
+        
+    - name: Extract metadata (tags, labels) for producer
+      id: producer-meta
+      uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/producer
         
     - name: Build and push consumer docker image
       uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
       with:
-        contex: apps 
+        context: apps 
         file: apps/consumer/Dockerfile
-        tag: q8s-consumer:latest
+        tags: ${{ steps.consumer-meta.outputs.tags }}
+        labels: ${{ steps.consumer-meta.outputs.labels }}
         push: true
         
     - name: Build and push producer docker image
       uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
       with:
-        contex: apps 
+        context: apps 
         file: apps/producer/Dockerfile
-        tag: q8s-producer:latest
+        tags: ${{ steps.producer-meta.outputs.tags }}
+        labels: ${{ steps.producer-meta.outputs.labels }}
         push: true
 
