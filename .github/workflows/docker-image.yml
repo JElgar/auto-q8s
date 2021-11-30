@@ -3,8 +3,7 @@ name: Docker build and push
 on:
   push:
     branches: [ main ]
-    paths:
-    - 'apps/**'
+
     
 env:
   REGISTRY: ghcr.io
@@ -25,7 +24,7 @@ jobs:
     - name: Build and push consumer docker image
       uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
       with:
-        contex: apps 
+        context: apps 
         file: apps/consumer/Dockerfile
         tag: q8s-consumer:latest
         push: true
@@ -33,7 +32,7 @@ jobs:
     - name: Build and push producer docker image
       uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
       with:
-        contex: apps 
+        context: apps 
         file: apps/producer/Dockerfile
         tag: q8s-producer:latest
         push: true
