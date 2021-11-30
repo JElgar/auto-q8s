@@ -1,0 +1,18 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+    - 'apps/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the Docker image
+      run: docker build apps --file apps/consumer/Dockerfile --tag q8s-consumer:latest
+      
+    - name: Build the Docker image
+      run: docker build apps --file apps/producer/Dockerfile --tag q8s-producer:latest
