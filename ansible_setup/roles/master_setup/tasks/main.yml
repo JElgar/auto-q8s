@@ -33,6 +33,8 @@
       - apt-transport-https
       - ca-certificates
       - curl
+      - open-iscsi
+      - nfs-common
 
 - name: yet more stuff
   shell: curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg

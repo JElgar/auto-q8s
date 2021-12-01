@@ -29,3 +29,6 @@ envsubst < metallb/metallb_configmap.yml | kubectl apply -f -
 # Install cert manager
 kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.6.1/cert-manager.yaml
 kubectl apply -f cert-manager
+
+# Install longhorn
+kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.2.2/deploy/longhorn.yaml
