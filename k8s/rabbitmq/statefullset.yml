@@ -79,10 +79,11 @@ spec:
       name: data
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      storageClassName: "longhorn"
+      storageClassName: "local-path"
       resources:
         requests:
           storage: 50Mi
+
 ---
 apiVersion: v1
 kind: Service
