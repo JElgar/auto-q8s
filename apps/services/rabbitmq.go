@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/streadway/amqp"
 )
@@ -68,6 +69,19 @@ func (rmq *Rmq) Consume() []byte {
 }
 
 
+func connectionLoop(connectionStr string) *amqp.Connection {
+    for {
+      conn, rabbitErr := amqp.Dial(connectionStr)
+      if (rabbitErr == nil) {
+        log.Println("Connected to rabbitmq!")
+        return conn
+      }
+      log.Println("Failed to connect to cluster. Trying again in 2 seconds.")
+      time.Sleep(2 * time.Second)
+    }
+}
+
+
 func RabbitmqSetup() *Rmq {
     connectionStr := fmt.Sprintf(
         "amqp://%s:%s@%s:%s/",
@@ -76,11 +90,7 @@ func RabbitmqSetup() *Rmq {
         os.Getenv("RMQ_HOST"),
         os.Getenv("RMQ_PORT"),
     )
-    conn, rabbitErr := amqp.Dial(connectionStr)
-
-    if (rabbitErr != nil) {
-        log.Fatal("Failed to connect to rabbitmq")
-    }
+    conn := connectionLoop(connectionStr)
 
     channel, err := conn.Channel()
     if (err != nil) {
