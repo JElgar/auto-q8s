@@ -31,4 +31,5 @@ kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.6
 kubectl apply -f k8s/cert-manager
 
 # Install longhorn
-kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.2.2/deploy/longhorn.yaml
+# kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.2.2/deploy/longhorn.yaml
+kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
