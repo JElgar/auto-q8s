@@ -15,7 +15,7 @@ spec:
         app: producer
     spec:
       containers:
-        - name:  
+        - name: producer 
           image: ghcr.io/jelgar/auto-q8s/producer:main
           ports:
             - containerPort: 1000
