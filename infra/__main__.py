@@ -101,6 +101,7 @@ def create_master_nodes(number_of_master_nodes: int) -> None:
 
     k8s_subdomain = f"k8s.{pulumi.get_stack()}"
     pulumi.export("control_plane_endpoint", f"{k8s_subdomain}.{constants.zone_domain}")
+    master_node_ip = None
     for i in range(number_of_master_nodes):
         node = create_node(
             name=f"{constants.master_node_name_prefix}_{i}",
@@ -109,8 +110,9 @@ def create_master_nodes(number_of_master_nodes: int) -> None:
             security_group=security_group,
         )
         if i == 0:
+            master_node_ip = node.public_ip
             create_dns_record(f"{k8s_subdomain}_{i}", k8s_subdomain, node.public_ip)
-            create_dns_record("producer_endpoint", "producer", node.public_ip)
+    pulumi.export("load_balancer_ip", master_node_ip)
 
 
 pulumi.export("base_url", f"{pulumi.get_stack()}.{constants.zone_domain}")
