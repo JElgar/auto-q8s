@@ -1,1 +1,4 @@
-kubectl apply -f "https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml"
+kubectl apply -n rabbits -f rbac.yml
+kubectl apply -n rabbits -f configmap.yml
+kubectl apply -n rabbits -f secret.yml
+kubectl apply -n rabbits -f statefullset.yml
