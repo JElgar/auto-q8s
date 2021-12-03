@@ -7,6 +7,7 @@ import pulumi_aws as aws
 from pulumi_aws.ec2.key_pair import KeyPair
 from pulumi_aws.ec2.security_group import SecurityGroup
 import pulumi_cloudflare as cloudflare
+import pulumi_hcloud as hcloud
 
 import constants
 
@@ -37,7 +38,7 @@ def create_key():
     )
 
 
-def create_node(
+def create_aws_node(
     name: str, ami: str, ssh_key: KeyPair, security_group: SecurityGroup
 ) -> aws.ec2.Instance:
     instance = aws.ec2.Instance(
@@ -55,6 +56,20 @@ def create_node(
     # Export server details
     pulumi.export(f"{name}_arn", instance.arn)
     pulumi.export(f"{name}_ip", instance.public_ip)
+
+    return instance
+
+
+def create_hetzner_node(
+    name: str,
+    ssh_key_name: str,
+) -> hcloud.Server:
+    instance = hcloud.Server(
+        name, image="ubuntu-20.04", ssh_keys=[ssh_key_name], server_type="cx21"
+    )
+
+    # Export server details
+    pulumi.export(f"{name}_ip", instance.ipv4_address)
 
     return instance
 
@@ -102,7 +117,7 @@ def create_master_nodes(number_of_master_nodes: int) -> None:
     k8s_subdomain = f"k8s.{pulumi.get_stack()}"
     pulumi.export("control_plane_endpoint", f"{k8s_subdomain}.{constants.zone_domain}")
     for i in range(number_of_master_nodes):
-        node = create_node(
+        node = create_aws_node(
             name=f"{constants.master_node_name_prefix}_{i}",
             ami=ubuntu_ami,
             ssh_key=key,
@@ -112,5 +127,20 @@ def create_master_nodes(number_of_master_nodes: int) -> None:
             create_dns_record(f"{k8s_subdomain}_{i}", k8s_subdomain, node.public_ip)
 
 
+def create_master_nodes_hetzner(number_of_master_nodes: int) -> None:
+    key = "jelgar@JamesLaptop"
+
+    k8s_subdomain = f"k8s.{pulumi.get_stack()}"
+    pulumi.export("control_plane_endpoint", f"{k8s_subdomain}.{constants.zone_domain}")
+    for i in range(number_of_master_nodes):
+        node = create_hetzner_node(
+            name=f"{constants.master_node_name_prefix}-{i}",
+            ssh_key_name=key,
+        )
+        if i == 0:
+            create_dns_record(f"{k8s_subdomain}_{i}", k8s_subdomain, node.ipv4_address)
+
+
 pulumi.export("base_url", f"{pulumi.get_stack()}.{constants.zone_domain}")
-create_master_nodes(constants.number_of_master_nodes)
+# create_master_nodes(constants.number_of_master_nodes)
+create_master_nodes_hetzner(constants.number_of_master_nodes)
