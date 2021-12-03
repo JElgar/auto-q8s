@@ -17,5 +17,14 @@ spec:
       containers:
         - name: producer 
           image: ghcr.io/jelgar/auto-q8s/producer:main
+          env:
+            - name: RMQ_USER
+              value: "default_user_1wr2WB-RRvDIWiP7EUA"
+            - name: RMQ_PASSWORD
+              value: "4IafXLb9Ox9MHpTGDN2eGGAcvx8HAiSe"
+            - name: RMQ_HOST
+              value: "queue"
+            - name: RMQ_PORT
+              value: "5672"
           ports:
             - containerPort: 1000

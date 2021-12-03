@@ -1,6 +1,6 @@
 # Install calico pod network
-# kubectl create -f https://docs.projectcalico.org/manifests/tigera-operator.yaml
-# kubectl create -f https://docs.projectcalico.org/manifests/custom-resources.yaml
+kubectl create -f https://docs.projectcalico.org/manifests/tigera-operator.yaml
+kubectl create -f https://docs.projectcalico.org/manifests/custom-resources.yaml
 
 # Untain nodes (allow container to run on them)
 kubectl taint nodes --all node-role.kubernetes.io/master-
@@ -23,13 +23,18 @@ kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.6/manife
 kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.6/manifests/metallb.yaml
 kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
 ## Apply metallb config (created in glue script)
-# kubectl apply -f metallb 
-# envsubst < k8s/metallb/metallb_configmap.yml | kubectl apply -f -
+envsubst < ./metallb/metallb_configmap.yml | kubectl apply -f -
 
 # Install cert manager
-# kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.6.1/cert-manager.yaml
-# kubectl apply -f k8s/cert-manager
+kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.6.1/cert-manager.yaml
+kubectl apply -f ./cert-manager
 
 # Install longhorn
 # kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.2.2/deploy/longhorn.yaml
 # kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
+
+# Install local path storage 
+kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
+
+# Install rabbitmq operator
+kubectl apply -f "https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml"
