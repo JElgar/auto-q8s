@@ -30,7 +30,7 @@ def write_ansible_variables(control_plane_endpoint, ansible_dir: str):
 def main(pulumi_state, ansible_dir):
     pulumi_state = json.loads(pulumi_state)
     ips = [
-        pulumi_state[f"{constants.master_node_name_prefix}_{i}_ip"]
+        pulumi_state[f"{constants.master_node_name_prefix}-{i}_ip"]
         for i in range(constants.number_of_master_nodes)
     ]
     master_init_ip = ips.pop(0)
