@@ -1,13 +1,12 @@
 # Install calico pod network
-# kubectl create -f https://docs.projectcalico.org/manifests/tigera-operator.yaml
-# kubectl create -f https://docs.projectcalico.org/manifests/custom-resources.yaml
+kubectl create -f https://docs.projectcalico.org/manifests/tigera-operator.yaml
+kubectl create -f https://docs.projectcalico.org/manifests/custom-resources.yaml
 
 # Untain nodes (allow container to run on them)
 kubectl taint nodes --all node-role.kubernetes.io/master-
 
 # Install istio
 istioctl operator init
-kubectl create ns istio-system
 kubectl apply -f - <<EOF
 apiVersion: install.istio.io/v1alpha1
 kind: IstioOperator
