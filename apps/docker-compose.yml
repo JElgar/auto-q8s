@@ -13,7 +13,7 @@ services:
       context: .
       dockerfile: producer/Dockerfile
     ports:
-      - '10000:10000'
+      - '3000:3000'
     networks:
       - rabbitmq
     environment:

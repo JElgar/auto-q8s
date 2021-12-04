@@ -24,7 +24,7 @@ func (env *Env) handlePostRequest(w http.ResponseWriter, r *http.Request){
 
 func (env *Env) handleRequests() {
     http.HandleFunc("/", env.handlePostRequest)
-    log.Fatal(http.ListenAndServe(":10000", nil))
+    log.Fatal(http.ListenAndServe(":3000", nil))
 }
 
 func main() {
