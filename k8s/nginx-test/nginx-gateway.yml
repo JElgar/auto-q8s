@@ -30,7 +30,7 @@ spec:
         prefix: /
     route:
     - destination:
-        host:  nginx-service
+        host: producer-service
         port:
           number:
-            80
+            10000

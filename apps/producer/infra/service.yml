@@ -6,5 +6,6 @@ spec:
   selector:
     app: producer 
   ports:
-  - port: 1000
-    name: http
+  - port: 80
+    protocol: TCP
+    targetPort: 10000

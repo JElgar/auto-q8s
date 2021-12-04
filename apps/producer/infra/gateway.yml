@@ -44,4 +44,4 @@ spec:
         host:  producer-service
         port:
           number:
-            1000
+            80

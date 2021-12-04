@@ -5,5 +5,5 @@ RUN go build -o /go/bin/server consumer/consumer.go
 FROM alpine:3.10
 WORKDIR app
 COPY --from=GO_BUILD /go/bin/server ./
-EXPOSE 8080
+EXPOSE 10000
 CMD ./server

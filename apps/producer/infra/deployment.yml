@@ -17,6 +17,8 @@ spec:
       containers:
         - name: producer 
           image: ghcr.io/jelgar/auto-q8s/producer:main
+          ports:
+            - containerPort: 10000
           imagePullPolicy: Always
           env:
             - name: RMQ_USER
@@ -33,5 +35,3 @@ spec:
               value: "queue"
             - name: RMQ_PORT
               value: "5672"
-          ports:
-            - containerPort: 1000
