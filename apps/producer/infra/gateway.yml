@@ -11,7 +11,7 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - "*"
+    - producer.$CLUSTER_BASE_URL
       # tls:
       #   httpsRedirect: true # sends 301 redirect for http requests
       # - port:
@@ -32,7 +32,7 @@ metadata:
   namespace: default 
 spec:
   hosts:
-  - "*"
+  - producer.$CLUSTER_BASE_URL
   gateways:
   - producer-gateway
   http:
