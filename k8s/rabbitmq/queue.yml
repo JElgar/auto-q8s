@@ -1,5 +1,11 @@
 apiVersion: rabbitmq.com/v1beta1
 kind: RabbitmqCluster
 metadata:
-  name: queue
-
+  name: queue 
+spec:
+  persistence:
+    storageClassName: "local-path"
+    storage: 50Mi
+  service:
+    type: ClusterIP 
+  replicas: 1

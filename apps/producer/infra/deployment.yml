@@ -17,5 +17,21 @@ spec:
       containers:
         - name: producer 
           image: ghcr.io/jelgar/auto-q8s/producer:main
+          imagePullPolicy: Always
+          env:
+            - name: RMQ_USER
+              valueFrom:
+                secretKeyRef:
+                  name: queue-default-user
+                  key: username
+            - name: RMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: queue-default-user
+                  key: password
+            - name: RMQ_HOST
+              value: "queue"
+            - name: RMQ_PORT
+              value: "5672"
           ports:
             - containerPort: 1000
