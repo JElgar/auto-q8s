@@ -1,7 +1,6 @@
 package services
 
 import (
-	"encoding/base64"
 	"fmt"
 	"log"
 	"os"
@@ -84,19 +83,10 @@ func connectionLoop(connectionStr string) *amqp.Connection {
 
 
 func RabbitmqSetup() *Rmq {
-    username, err := base64.StdEncoding.DecodeString(os.Getenv("RMQ_USER"))
-    if err != nil {
-      log.Fatalf("Could not decode rabbitmq username %s", os.Getenv("RMQ_USER"))
-    }
-    password, err := base64.StdEncoding.DecodeString(os.Getenv("RMQ_PASSWORD"))
-    if err != nil {
-      log.Fatalf("Could not decode rabbitmq pasword %s", os.Getenv("RMQ_PASSWORD"))
-    }
-
     connectionStr := fmt.Sprintf(
         "amqp://%s:%s@%s:%s/",
-        password,
-        username,
+        os.Getenv("RMQ_USER"),
+        os.Getenv("RMQ_PASSWORD"),
         os.Getenv("RMQ_HOST"),
         os.Getenv("RMQ_PORT"),
     )
