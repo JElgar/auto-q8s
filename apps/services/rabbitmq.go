@@ -86,11 +86,11 @@ func connectionLoop(connectionStr string) *amqp.Connection {
 func RabbitmqSetup() *Rmq {
     username, err := base64.StdEncoding.DecodeString(os.Getenv("RMQ_USER"))
     if err != nil {
-      log.Fatalln("Could not decode rabbitmq username")
+      log.Fatalf("Could not decode rabbitmq username %s", os.Getenv("RMQ_USER"))
     }
     password, err := base64.StdEncoding.DecodeString(os.Getenv("RMQ_PASSWORD"))
     if err != nil {
-      log.Fatalln("Could not decode rabbitmq pasword")
+      log.Fatalf("Could not decode rabbitmq pasword %s", os.Getenv("RMQ_PASSWORD"))
     }
 
     connectionStr := fmt.Sprintf(

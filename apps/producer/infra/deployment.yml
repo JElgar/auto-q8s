@@ -17,6 +17,7 @@ spec:
       containers:
         - name: producer 
           image: ghcr.io/jelgar/auto-q8s/producer:main
+          imagePullPolicy: Always
           env:
             - name: RMQ_USER
               valueFrom:
