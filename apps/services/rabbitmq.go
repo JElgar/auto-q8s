@@ -28,6 +28,7 @@ func (rmq *Rmq) Publish(data []byte) {
     if (err != nil) {
         log.Fatal("Failed to publish to queue")
     }
+    log.Printf("Published to queue")
 }
 
 
@@ -43,7 +44,7 @@ func (rmq *Rmq) Consumer() (<-chan amqp.Delivery) {
     )
     
     if (err != nil) {
-        log.Fatal("Failed to publish to queue")
+        log.Fatal("Failed to consume from queue")
     }
 
     return data
@@ -51,20 +52,7 @@ func (rmq *Rmq) Consumer() (<-chan amqp.Delivery) {
 
 
 func (rmq *Rmq) Consume() []byte {
-    data, err := rmq.Channel.Consume(
-      rmq.Queue.Name, // queue
-      "",     // consumer
-      true,   // auto-ack
-      false,  // exclusive
-      false,  // no-local
-      false,  // no-wait
-      nil,    // args
-    )
-    
-    if (err != nil) {
-        log.Fatal("Failed to publish to queue")
-    }
-
+    data := rmq.Consumer()
     return (<-data).Body
 }
 
