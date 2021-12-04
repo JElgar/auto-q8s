@@ -11,16 +11,37 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - producer.$CLUSTER_BASE_URL
-    tls:
-      httpsRedirect: true # sends 301 redirect for http requests
-  - port:
-      number: 443
-      name: https
-      protocol: HTTPS
-    tls:
-      mode: SIMPLE
-      credentialName: producer-cert
-    hosts:
-    - producer.$CLUSTER_BASE_URL
+    - "*"
+      # tls:
+      #   httpsRedirect: true # sends 301 redirect for http requests
+      # - port:
+      #     number: 443
+      #     name: https
+      #     protocol: HTTPS
+      #   tls:
+      #     mode: SIMPLE
+      #     credentialName: producer-cert
+      #   hosts:
+      #   - "*"
 
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: producer-vs
+  namespace: default 
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - producer-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host:  producer-service
+        port:
+          number:
+            1000

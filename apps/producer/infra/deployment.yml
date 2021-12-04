@@ -19,9 +19,15 @@ spec:
           image: ghcr.io/jelgar/auto-q8s/producer:main
           env:
             - name: RMQ_USER
-              value: "default_user_1wr2WB-RRvDIWiP7EUA"
+              valueFrom:
+                secretKeyRef:
+                  name: queue-default-user
+                  key: username
             - name: RMQ_PASSWORD
-              value: "4IafXLb9Ox9MHpTGDN2eGGAcvx8HAiSe"
+              valueFrom:
+                secretKeyRef:
+                  name: queue-default-user
+                  key: password
             - name: RMQ_HOST
               value: "queue"
             - name: RMQ_PORT

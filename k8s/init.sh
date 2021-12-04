@@ -17,6 +17,7 @@ metadata:
 spec:
   profile: default
 EOF
+kubectl label namespace default istio-injection=enabled
 
 # Install metallb
 kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.6/manifests/namespace.yaml

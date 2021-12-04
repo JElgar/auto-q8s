@@ -17,8 +17,8 @@ services:
     networks:
       - rabbitmq
     environment:
-      - RMQ_USER=guest
-      - RMQ_PASSWORD=guest
+      - RMQ_USER=Z3Vlc3Q=
+      - RMQ_PASSWORD=Z3Vlc3Q=
       - RMQ_HOST=rabbitmq
       - RMQ_PORT=5672
     depends_on:
@@ -31,8 +31,8 @@ services:
     networks:
       - rabbitmq
     environment:
-      - RMQ_USER=guest
-      - RMQ_PASSWORD=guest
+      - RMQ_USER=Z3Vlc3Q=
+      - RMQ_PASSWORD=Z3Vlc3Q=
       - RMQ_HOST=rabbitmq
       - RMQ_PORT=5672
     depends_on:
