@@ -57,6 +57,15 @@ func (rmq *Rmq) Consume() []byte {
 }
 
 
+func (rmq *Rmq) QueueLength() uint32 {
+  result, ok, err := rmq.Channel.Get(rmq.Queue.Name, false)
+  if !ok {
+    log.Panicf("Failed to get queue length: %s", err)
+  }
+  return result.MessageCount
+}
+
+
 func connectionLoop(connectionStr string) *amqp.Connection {
     for {
       conn, rabbitErr := amqp.Dial(connectionStr)

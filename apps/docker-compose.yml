@@ -37,6 +37,22 @@ services:
       - RMQ_PORT=5672
     depends_on:
       - rabbitmq
+  
+  scaler:
+    build:
+      context: .
+      dockerfile: scaler/Dockerfile
+    networks:
+      - rabbitmq
+    env_file:
+      - ../.env
+    environment:
+      - RMQ_USER=guest
+      - RMQ_PASSWORD=guest
+      - RMQ_HOST=rabbitmq
+      - RMQ_PORT=5672
+    depends_on:
+      - rabbitmq
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
