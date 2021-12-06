@@ -1,7 +1,7 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
-  name: producer-gateway
+  name: rabbit-gateway
 spec:
   selector:
     istio: ingressgateway
@@ -11,37 +11,26 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - producer.$CLUSTER_BASE_URL
-    tls:
-      httpsRedirect: true # sends 301 redirect for http requests
-  - port:
-      number: 443
-      name: https
-      protocol: HTTPS
-    tls:
-      mode: SIMPLE
-      credentialName: producer-cert
-    hosts:
-    - producer.$CLUSTER_BASE_URL
+    - queue.$CLUSTER_BASE_URL
 
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: producer-vs
+  name: queue-vs
   namespace: default 
 spec:
   hosts:
-  - producer.$CLUSTER_BASE_URL
+  - queue.$CLUSTER_BASE_URL
   gateways:
-  - producer-gateway
+  - rabbit-gateway
   http:
   - match:
     - uri:
         prefix: /
     route:
     - destination:
-        host:  producer-service
+        host:  queue
         port:
           number:
-            80
+            15672

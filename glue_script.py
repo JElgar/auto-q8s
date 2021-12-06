@@ -34,10 +34,15 @@ def main(pulumi_state, ansible_dir):
         for i in range(constants.number_of_master_nodes)
     ]
     master_init_ip = ips.pop(0)
+    worker_ips = [
+        pulumi_state[f"{constants.worker_node_name_prefix}-{i}_ip"]
+        for i in range(constants.number_of_worker_nodes)
+    ]
     write_ansible_config(
         {
             "master_init_node": [master_init_ip],
             "master_join_nodes": ips,
+            "worker_nodes": worker_ips,
         },
         ansible_dir,
     )

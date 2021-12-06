@@ -1,0 +1,6 @@
+- name:
+  debug:
+    msg: "JOIN COMMAND: {{ hostvars['K8S_DATA']['join_command'] }}"
+
+- name: Join cluster as worker node
+  shell: "{{ hostvars['K8S_DATA']['join_command'] }}"

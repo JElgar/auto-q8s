@@ -11,6 +11,8 @@ import pulumi_hcloud as hcloud
 
 import constants
 
+KEY = "jelgar@JamesLaptop"
+
 
 def get_ubuntu_ami() -> str:
     return aws.ec2.get_ami(
@@ -63,9 +65,10 @@ def create_aws_node(
 def create_hetzner_node(
     name: str,
     ssh_key_name: str,
+    server_type: str,
 ) -> hcloud.Server:
     instance = hcloud.Server(
-        name, image="ubuntu-20.04", ssh_keys=[ssh_key_name], server_type="cpx31"
+        name, image="ubuntu-20.04", ssh_keys=[ssh_key_name], server_type=server_type
     )
 
     # Export server details
@@ -128,23 +131,37 @@ def create_master_nodes(number_of_master_nodes: int) -> None:
 
 
 def create_master_nodes_hetzner(number_of_master_nodes: int) -> None:
-    key = "jelgar@JamesLaptop"
-
     k8s_subdomain = f"k8s.{pulumi.get_stack()}"
     pulumi.export("control_plane_endpoint", f"{k8s_subdomain}.{constants.zone_domain}")
     for i in range(number_of_master_nodes):
         node = create_hetzner_node(
             name=f"{constants.master_node_name_prefix}-{i}",
-            ssh_key_name=key,
+            ssh_key_name=KEY,
+            server_type=constants.master_node_size,
         )
         if i == 0:
             create_dns_record(f"{k8s_subdomain}_{i}", k8s_subdomain, node.ipv4_address)
             create_dns_record(
                 "producer_endpoint", f"producer.{pulumi.get_stack()}", node.ipv4_address
             )
+            create_dns_record(
+                "queue_ui_endpoint", f"queue.{pulumi.get_stack()}", node.ipv4_address
+            )
+
+
+def create_worker_nodes_hetzner(number_of_worker_nodes: int) -> None:
+    k8s_subdomain = f"k8s.{pulumi.get_stack()}"
+    pulumi.export("control_plane_endpoint", f"{k8s_subdomain}.{constants.zone_domain}")
+    for i in range(number_of_worker_nodes):
+        create_hetzner_node(
+            name=f"{constants.worker_node_name_prefix}-{i}",
+            ssh_key_name=KEY,
+            server_type=constants.worker_node_size,
+        )
 
 
 base_url = f"{pulumi.get_stack()}.{constants.zone_domain}"
 pulumi.export("base_url", base_url)
 # create_master_nodes(constants.number_of_master_nodes)
 create_master_nodes_hetzner(constants.number_of_master_nodes)
+create_worker_nodes_hetzner(constants.number_of_worker_nodes)

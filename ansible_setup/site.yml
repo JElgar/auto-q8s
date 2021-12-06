@@ -3,13 +3,21 @@
   become: yes
   become_user: root
   roles:
-    - master_setup
+    - setup
     - master_init
 
-- name: Provision master node
+- name: Join other master node
   hosts: master_join_nodes
   become: yes
   become_user: root
   roles:
-    - role: master_setup
+    - role: setup 
     - role: master_join
+      
+- name: Join worker node
+  hosts: worker_nodes
+  become: yes
+  become_user: root
+  roles:
+    - role: setup 
+    - role: worker_join

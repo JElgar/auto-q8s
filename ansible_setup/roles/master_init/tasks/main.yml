@@ -8,7 +8,6 @@
 - name: If cluter not running init 
   include_tasks: init.yml
   when: not kubeadm_ca.stat.exists
-  run_once: yes
   register: init_complete
 
 - name: Copy Conf

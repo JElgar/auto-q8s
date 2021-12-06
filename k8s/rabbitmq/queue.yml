@@ -8,4 +8,4 @@ spec:
     storage: 50Mi
   service:
     type: ClusterIP 
-  replicas: 1
+  replicas: 3
