@@ -2,7 +2,6 @@ package main
 
 import (
 	"apps/services"
-	"fmt"
 	"log"
 	"os"
 	"sync"
@@ -27,16 +26,19 @@ func main() {
 
     // Do k8s stuff
     for {
+        log.Printf("Checking")
         currentNumberOfNodes := services.NumberOfNodes()
         lengthOfQueue := env.Rmq.QueueLength()
     
-        numberOfNodesToMake := (lengthOfQueue / 100) - currentNumberOfNodes
+        numberOfNodesToMake := int((lengthOfQueue / 100) - currentNumberOfNodes)
         if numberOfNodesToMake > 20 {
             log.Panicf("Cannot create %d!", numberOfNodesToMake)
         }
+        log.Printf("Number of nodes in cluster: %d", currentNumberOfNodes)
+        log.Printf("Number of items in queue: %d", lengthOfQueue)
+        log.Printf("Number of nodes to create: %d", numberOfNodesToMake)
 
         var wg sync.WaitGroup
-  
         if numberOfNodesToMake > 0 {
             wg.Add(numberOfNodesToMake)
             for  i := 0; i < numberOfNodesToMake; i++ {
@@ -48,7 +50,9 @@ func main() {
         }
        
         // Wait till all new nodes have initalised
+        log.Print("Waiting for nodes to be created and inited")
         wg.Wait()
+        log.Println("Done")
     }
 
 }
