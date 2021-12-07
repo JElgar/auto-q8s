@@ -74,6 +74,8 @@ func (hetzner *Hetzner) getSshKeyId() (*hcloud.SSHKey, error) {
     response, err := hetzner.Client.SSHKey.AllWithOpts(context.Background(), options)
     if err != nil || len(response) == 0 {
         fmt.Println("Could not get ssh key")
+        fmt.Println(response)
+        fmt.Println(err)
         return nil, err
     }
     return response[0], nil
