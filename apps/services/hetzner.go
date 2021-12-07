@@ -29,6 +29,8 @@ func HetznerSetup() *Hetzner {
 
 func InitNode(response hcloud.ServerCreateResult, joinCommand string) {
     time.Sleep(time.Second * 20)
+    fmt.Println("The private key is: ")
+    fmt.Println(os.Getenv("SSH_PRIVATE_KEY"))
     key := []byte(os.Getenv("SSH_PRIVATE_KEY"))
 
     signer, err := ssh.ParsePrivateKey(key)
@@ -66,7 +68,7 @@ func InitNode(response hcloud.ServerCreateResult, joinCommand string) {
     fmt.Println("Ran join")
 }
 
-func (hetzner *Hetzner) getSshKeyId() (*hcloud.SSHKey, error) {
+func (hetzner *Hetzner) GetSshKeyId() (*hcloud.SSHKey, error) {
     options := hcloud.SSHKeyListOpts{
         Name: "jelgar@JamesLaptop",
     }
@@ -83,7 +85,7 @@ func (hetzner *Hetzner) getSshKeyId() (*hcloud.SSHKey, error) {
 
 func (hetzner *Hetzner) CreateNode(joinCommand string) {
     uuid, _ := uuid.NewV4()
-    sshKey, err := hetzner.getSshKeyId()
+    sshKey, err := hetzner.GetSshKeyId()
     if err != nil {
         return
     }

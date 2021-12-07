@@ -2,6 +2,7 @@ package main
 
 import (
 	"apps/services"
+	"fmt"
 	"log"
 	"os"
 	"sync"
@@ -14,9 +15,19 @@ type Env struct {
 
 func main() {
 
+    fmt.Println("Getting hetzner stuff")
+    fmt.Println(os.Getenv("HCLOUD_TOKEN"))
+
+    hetzner := services.HetznerSetup();
+    sshKey, err := hetzner.GetSshKeyId()
+
+    if err != nil {
+        log.Panicln("Cannot get key")
+    }
+    fmt.Println("Got the id!")
+    fmt.Println(sshKey)
 
     rmq := services.RabbitmqSetup()
-    hetzner := services.HetznerSetup();
     env := &Env{
         Rmq: rmq,
         Hetzner: hetzner,
@@ -25,7 +36,7 @@ func main() {
     joinCommand := os.Getenv("JOIN_COMMAND")
 
     // Do k8s stuff
-    for {
+    // for {
         log.Printf("Checking")
         currentNumberOfNodes := services.NumberOfNodes()
         lengthOfQueue := env.Rmq.QueueLength()
@@ -53,6 +64,6 @@ func main() {
         log.Print("Waiting for nodes to be created and inited")
         wg.Wait()
         log.Println("Done")
-    }
+    // }
 
 }
