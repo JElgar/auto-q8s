@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
     "strconv"
-    // "io/ioutil"
-    // "golang.org/x/crypto/ssh"
+    "io/ioutil"
+    "golang.org/x/crypto/ssh"
 )
 
 type Env struct {
@@ -19,47 +19,48 @@ type Env struct {
 
 func main() {
 
-    // for {
-    //     key, err := ioutil.ReadFile("/etc/ssh-key/private-key")
-    //     if err != nil {
-    //         log.Println(err)
-    //         log.Fatalln("Failed to open private key file")
-    //     }
+    for {
+        key, err := ioutil.ReadFile("/etc/ssh-key/private-key")
+        fmt.Println(key)
+        if err != nil {
+            log.Println(err)
+            log.Fatalln("Failed to open private key file")
+        }
 
-    //     signer, err := ssh.ParsePrivateKey(key)
-	//     if err != nil {
-	//     	log.Fatalf("unable to parse private key: %v", err)
-	//     }
-    //     fmt.Println("Done signer")
+        signer, err := ssh.ParsePrivateKey(key)
+	    if err != nil {
+	    	log.Fatalf("unable to parse private key: %v", err)
+	    }
+        fmt.Println("Done signer")
 
-	//     config := &ssh.ClientConfig{
-	//     	User: "root",
-	//     	Auth: []ssh.AuthMethod{
-	//     		// Add in password check here for moar security.
-	//     		ssh.PublicKeys(signer),
-	//     	},
-	//     	HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-    //     }
+	    config := &ssh.ClientConfig{
+	    	User: "root",
+	    	Auth: []ssh.AuthMethod{
+	    		// Add in password check here for moar security.
+	    		ssh.PublicKeys(signer),
+	    	},
+	    	HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+        }
 
 
-    //     client, err := ssh.Dial("tcp", "65.108.147.7:22", config)
-    //     if err != nil {
-    //         log.Println(err)
-	//     	log.Fatal("unable to dial", err)
-    //     }
-    //     defer client.Close()
+        client, err := ssh.Dial("tcp", "65.108.147.7:22", config)
+        if err != nil {
+            log.Println(err)
+	    	log.Fatal("unable to dial", err)
+        }
+        defer client.Close()
 
-	//     session, err := client.NewSession()
-	//     if err != nil {
-	//     	log.Fatal("unable to create SSH session: ", err)
-    //     }
-    //     defer session.Close()
-    //     fmt.Println("Created session")
+	    session, err := client.NewSession()
+	    if err != nil {
+	    	log.Fatal("unable to create SSH session: ", err)
+        }
+        defer session.Close()
+        fmt.Println("Created session")
 
-    //     session.Run("ls"); 
-    //     fmt.Println("Ran init")
-    //     panic("All went well")
-    // }
+        session.Run("ls"); 
+        fmt.Println("Ran init")
+        panic("All went well")
+    }
 
     fmt.Println("Getting hetzner stuff")
     fmt.Println(os.Getenv("HCLOUD_TOKEN"))

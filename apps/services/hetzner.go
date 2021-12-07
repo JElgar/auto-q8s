@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"time"
     "io/ioutil"
 
@@ -29,57 +30,64 @@ func HetznerSetup() *Hetzner {
 }
 
 func InitNode(response hcloud.ServerCreateResult, joinCommand string) {
-    time.Sleep(time.Second * 20)
-    fmt.Println("The private key is: ")
-    fmt.Println(os.Getenv("SSH_PRIVATE_KEY"))
-
-    key, err := ioutil.ReadFile("/etc/ssh-key/private-key")
-    fmt.Println("Read private key from file: ")
-    fmt.Println(key)
+    cmd := fmt.Sprintf("ssh -i /etc/ssh-key/private-key %s:%s 'bash <(curl -s https://raw.githubusercontent.com/JElgar/auto-q8s/main/apps/scaler/init_worker.sh)'", response.Server.PublicNet.IPv4.IP.String(), "22")
+    out, err := exec.Command("bash", "-c", cmd).Output()
     if err != nil {
-        log.Println(err)
-        log.Fatalln("Failed to open private key file")
+        fmt.Println("Something went wrong")
+        fmt.Println(err)
     }
-    // key := []byte(os.Getenv("SSH_PRIVATE_KEY"))
+    fmt.Println(out)
+    // time.Sleep(time.Second * 20)
+    // fmt.Println("The private key is: ")
+    // fmt.Println(os.Getenv("SSH_PRIVATE_KEY"))
 
-    signer, err := ssh.ParsePrivateKey(key)
-	if err != nil {
-		log.Fatalf("unable to parse private key: %v", err)
-	}
-    fmt.Println("Done signer")
+    // key, err := ioutil.ReadFile("/etc/ssh-key/private-key")
+    // fmt.Println("Read private key from file: ")
+    // fmt.Println(key)
+    // if err != nil {
+    //     log.Println(err)
+    //     log.Fatalln("Failed to open private key file")
+    // }
+    // // key := []byte(os.Getenv("SSH_PRIVATE_KEY"))
 
-	config := &ssh.ClientConfig{
-		User: "root",
-		Auth: []ssh.AuthMethod{
-			// Add in password check here for moar security.
-			ssh.PublicKeys(signer),
-		},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-    }
+    // signer, err := ssh.ParsePrivateKey(key)
+	// if err != nil {
+	// 	log.Fatalf("unable to parse private key: %v", err)
+	// }
+    // fmt.Println("Done signer")
 
-    host := response.Server.PublicNet.IPv4.IP.String()
-    port := "22"
-    client, err := ssh.Dial("tcp", host+":"+port, config)
-    if err != nil {
-        log.Println(err)
-		log.Fatal("unable to dial", err)
-    }
+	// config := &ssh.ClientConfig{
+	// 	User: "root",
+	// 	Auth: []ssh.AuthMethod{
+	// 		// Add in password check here for moar security.
+	// 		ssh.PublicKeys(signer),
+	// 	},
+	// 	HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+    // }
 
-    defer client.Close()
-    fmt.Println("Created clinet")
+    // host := response.Server.PublicNet.IPv4.IP.String()
+    // port := "22"
+    // client, err := ssh.Dial("tcp", host+":"+port, config)
+    // if err != nil {
+    //     log.Println(err)
+	// 	log.Fatal("unable to dial", err)
+    // }
 
-	session, err := client.NewSession()
-	if err != nil {
-		log.Fatal("unable to create SSH session: ", err)
-    }
-    defer session.Close()
-    fmt.Println("Created session")
+    // defer client.Close()
+    // fmt.Println("Created clinet")
 
-    session.Run("bash <(curl -s https://raw.githubusercontent.com/JElgar/auto-q8s/main/apps/scaler/init_worker.sh)"); 
-    fmt.Println("Ran init")
+	// session, err := client.NewSession()
+	// if err != nil {
+	// 	log.Fatal("unable to create SSH session: ", err)
+    // }
+    // defer session.Close()
+    // fmt.Println("Created session")
+
+    // session.Run("bash <(curl -s https://raw.githubusercontent.com/JElgar/auto-q8s/main/apps/scaler/init_worker.sh)"); 
+    // fmt.Println("Ran init")
    
-    session.Run(joinCommand); 
-    fmt.Println("Ran join")
+    // session.Run(joinCommand); 
+    // fmt.Println("Ran join")
 }
 
 func (hetzner *Hetzner) GetSshKeyId() (*hcloud.SSHKey, error) {
