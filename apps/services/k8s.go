@@ -45,6 +45,12 @@ func DoStuff()  {
 			fmt.Printf("Found example-xxxxx pod in default namespace\n")
 		}
 
+		nodes, err := clientset.CoreV1().Nodes().List(context.Background(), metav1.ListOptions{})
+		if err != nil {
+			panic(err.Error())
+		}
+		fmt.Printf("There are %d nodes in the cluster\n", len(nodes.Items))
+		
 		time.Sleep(10 * time.Second)
     } 
 }

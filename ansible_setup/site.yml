@@ -5,6 +5,12 @@
   roles:
     - setup
     - master_init
+    
+- name: Export join command 
+  hosts: localhost 
+  become: no 
+  roles:
+    - role: export_join 
 
 - name: Join other master node
   hosts: master_join_nodes

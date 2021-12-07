@@ -9,7 +9,8 @@ import (
 
 	"github.com/hetznercloud/hcloud-go/hcloud"
 	"github.com/nu7hatch/gouuid"
-    "github.com/sfreiberg/simplessh"
+    // "github.com/sfreiberg/simplessh"
+    "golang.org/x/crypto/ssh"
 )
 
 type Hetzner struct {
@@ -26,24 +27,43 @@ func HetznerSetup() *Hetzner {
     return &Hetzner{Client: client} 
 }
 
-func InitNode(response hcloud.ServerCreateResult) {
+func InitNode(response hcloud.ServerCreateResult, joinCommand string) {
     time.Sleep(time.Second * 20)
-    var client *simplessh.Client
-    var err error
+    key := []byte(os.Getenv("SSH_PRIVATE_KEY"))
 
-    host := fmt.Sprintf("%s:22", response.Server.PublicNet.IPv4.IP.String())
-    homedir, err := os.UserHomeDir()
-    if client, err = simplessh.ConnectWithKeyFile(host, "root", fmt.Sprintf("%s/.ssh/id_rsa", homedir); err != nil {
-        fmt.Println(err)
-        return
+    signer, err := ssh.ParsePrivateKey(key)
+	if err != nil {
+		log.Fatalf("unable to parse private key: %v", err)
+	}
+    fmt.Println("Done signer")
+
+	config := &ssh.ClientConfig{
+		User: "root",
+		Auth: []ssh.AuthMethod{
+			// Add in password check here for moar security.
+			ssh.PublicKeys(signer),
+		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
     }
+
+    host := response.Server.PublicNet.IPv4.IP.String()
+    port := "22"
+    client, err := ssh.Dial("tcp", host+":"+port, config)
     defer client.Close()
+    fmt.Println("Created clinet")
 
-    // Now run the init script from github 
-    _, err = client.Exec("bash <(curl -s https://raw.githubusercontent.com/JElgar/auto-q8s/main/apps/scaler/init_worker.sh)"); 
-    if err != nil {
-        log.Println(err)
+	session, err := client.NewSession()
+	if err != nil {
+		log.Fatal("unable to create SSH session: ", err)
     }
+    defer session.Close()
+    fmt.Println("Created session")
+
+    session.Run("bash <(curl -s https://raw.githubusercontent.com/JElgar/auto-q8s/main/apps/scaler/init_worker.sh)"); 
+    fmt.Println("Ran init")
+   
+    session.Run(joinCommand); 
+    fmt.Println("Ran join")
 }
 
 func (hetzner *Hetzner) getSshKeyId() (*hcloud.SSHKey, error) {
@@ -59,7 +79,7 @@ func (hetzner *Hetzner) getSshKeyId() (*hcloud.SSHKey, error) {
     return response[0], nil
 }
 
-func (hetzner *Hetzner) CreateNode() {
+func (hetzner *Hetzner) CreateNode(joinCommand string) {
     uuid, _ := uuid.NewV4()
     sshKey, err := hetzner.getSshKeyId()
     if err != nil {
@@ -81,7 +101,7 @@ func (hetzner *Hetzner) CreateNode() {
     }
 
     log.Println("Node created")
-    InitNode(response)
+    InitNode(response, joinCommand)
 }
 
 func (hetzner *Hetzner) DeleteNode(name string) {

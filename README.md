@@ -33,5 +33,3 @@ To destroy run
 ```
 make down
 ```
-
-

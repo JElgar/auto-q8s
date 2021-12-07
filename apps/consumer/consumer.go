@@ -1,10 +1,11 @@
 package main
 
 import (
+	"apps/services"
+	"fmt"
 	"log"
-    "runtime"
-    "time"
-    "apps/services"
+	"runtime"
+	"time"
 )
 
 func idle() {
@@ -28,9 +29,12 @@ func idle() {
 
 func main() {
     rmq := services.RabbitmqSetup()
+    fmt.Println("Here we go")
+
     for d := range rmq.Consumer() {
         log.Printf("Doing work on: %s", d.Body)
         idle()
         log.Printf("Done work on: %s", d.Body)
+        rmq.Channel.Ack(d.DeliveryTag, false)
     }
 }
