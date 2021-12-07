@@ -44,6 +44,7 @@ func main() {
         lengthOfQueue := env.Rmq.QueueLength()
     
         numberOfNodesToMake := int((lengthOfQueue / 100) - currentNumberOfNodes)
+        numberOfNodesToMake = 1 
         if numberOfNodesToMake > 20 {
             log.Panicf("Cannot create %d!", numberOfNodesToMake)
         }
@@ -71,6 +72,9 @@ func main() {
         if err == nil {
             fmt.Println("Delaying next check")
             time.Sleep(time.Second * time.Duration(delay))
+        } else {
+            fmt.Printf("Failed to parse check delay %s", os.Getenv("CHECK_DELAY"))
+            time.Sleep(time.Minute * 2)
         }
     }
 

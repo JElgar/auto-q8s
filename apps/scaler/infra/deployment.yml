@@ -14,7 +14,6 @@ spec:
       labels: 
         app: scaler 
     spec:
-      hostNetwork: true
       volumes:
       - name: ssh-key-volume
         secret:
@@ -57,4 +56,4 @@ spec:
             - name: JOIN_COMMAND
               value: "$JOIN_COMMAND"
             - name: CHECK_DELAY
-              value: 600
+              value: "600"
