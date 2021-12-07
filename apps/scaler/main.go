@@ -8,8 +8,6 @@ import (
 	"sync"
 	"time"
     "strconv"
-    "io/ioutil"
-    "golang.org/x/crypto/ssh"
 )
 
 type Env struct {
