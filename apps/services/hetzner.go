@@ -34,6 +34,8 @@ func InitNode(response hcloud.ServerCreateResult, joinCommand string) {
     fmt.Println(os.Getenv("SSH_PRIVATE_KEY"))
 
     key, err := ioutil.ReadFile("/etc/ssh-key/private-key")
+    fmt.Println("Read private key from file: ")
+    fmt.Println(key)
     if err != nil {
         log.Println(err)
         log.Fatalln("Failed to open private key file")
