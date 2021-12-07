@@ -30,11 +30,11 @@ func HetznerSetup() *Hetzner {
 }
 
 func InitNode(response hcloud.ServerCreateResult, joinCommand string) {
-    cmd := fmt.Sprintf("ssh -i /etc/ssh-key/private-key %s:%s 'bash <(curl -s https://raw.githubusercontent.com/JElgar/auto-q8s/main/apps/scaler/init_worker.sh)'", response.Server.PublicNet.IPv4.IP.String(), "22")
+    cmd := fmt.Sprintf("ssh -i /etc/ssh-key/private-key %s 'bash <(curl -s https://raw.githubusercontent.com/JElgar/auto-q8s/main/apps/scaler/init_worker.sh)'", response.Server.PublicNet.IPv4.IP.String())
     out, err := exec.Command("bash", "-c", cmd).Output()
     if err != nil {
-        fmt.Println("Something went wrong")
-        fmt.Println(err)
+        log.Println("Something went wrong")
+        log.Println(err)
     }
     fmt.Println(out)
     // time.Sleep(time.Second * 20)

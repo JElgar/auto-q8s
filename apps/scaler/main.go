@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
     "strconv"
+	"os/exec"
 )
 
 type Env struct {
@@ -16,6 +17,16 @@ type Env struct {
 }
 
 func main() {
+
+    log.Println("Running test ssh")
+    cmd := fmt.Sprintf("ssh -i /etc/ssh-key/private-key %s 'ls -al'", "65.108.147.7")
+    out, err := exec.Command("bash", "-c", cmd).Output()
+    if err != nil {
+        log.Println("Something went wrong")
+        log.Println(err)
+    }
+    fmt.Println(out)
+    log.Println("Ran test ssh")
 
     fmt.Println("Getting hetzner stuff")
     fmt.Println(os.Getenv("HCLOUD_TOKEN"))
