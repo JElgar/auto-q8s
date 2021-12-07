@@ -19,7 +19,7 @@ type Env struct {
 func main() {
 
     log.Println("Running test ssh")
-    cmd := fmt.Sprintf("ssh -i /etc/ssh-key/private-key %s 'ls -al'", "65.108.147.7")
+    cmd := fmt.Sprintf("ssh -i /etc/ssh-key/private-key %s -o StrictHostKeyChecking=no 'ls -al'", "65.108.147.7")
     out, err := exec.Command("bash", "-c", cmd).Output()
     if err != nil {
         log.Println("Something went wrong")
