@@ -41,4 +41,4 @@ kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisione
 kubectl apply -f "https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml"
 
 # Create ssh key
-kubectl create secret generic my-secret --from-file=ssh-privatekey=/home/$USER/.ssh/id_rsa --from-file=ssh-publickey=/home/$USER/.ssh/id_rsa.pub
+kubectl create secret generic sshkey --from-file=private-key=/home/$USER/.ssh/id_rsa --from-file=public-key=/home/$USER/.ssh/id_rsa.pub

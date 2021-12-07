@@ -3,8 +3,9 @@ package main
 import (
 	"apps/services"
 	"fmt"
-	// "os"
-	"time"
+	"log"
+	"os"
+	"sync"
 )
 
 type Env struct {
@@ -14,8 +15,6 @@ type Env struct {
 
 func main() {
 
-    // Do k8s stuff
-    services.DoStuff()
 
     rmq := services.RabbitmqSetup()
     hetzner := services.HetznerSetup();
@@ -24,11 +23,32 @@ func main() {
         Hetzner: hetzner,
     }
 
-    // env.Hetzner.DeleteNode("worker-node-098c185b-5d4a-479a-556a-53f3144695ff")
-    // env.Hetzner.CreateNode(os.Getenv("JOIN_COMMAND"))
+    joinCommand := os.Getenv("JOIN_COMMAND")
+
+    // Do k8s stuff
     for {
-        time.Sleep(time.Second * 5)
-        fmt.Println("The queue length is: ")
-        fmt.Println(env.Rmq.QueueLength())
+        currentNumberOfNodes := services.NumberOfNodes()
+        lengthOfQueue := env.Rmq.QueueLength()
+    
+        numberOfNodesToMake := (lengthOfQueue / 100) - currentNumberOfNodes
+        if numberOfNodesToMake > 20 {
+            log.Panicf("Cannot create %d!", numberOfNodesToMake)
+        }
+
+        var wg sync.WaitGroup
+  
+        if numberOfNodesToMake > 0 {
+            wg.Add(numberOfNodesToMake)
+            for  i := 0; i < numberOfNodesToMake; i++ {
+                go func() {
+                    defer wg.Done()
+                    env.Hetzner.CreateNode(joinCommand)
+                }()
+            }
+        }
+       
+        // Wait till all new nodes have initalised
+        wg.Wait()
     }
+
 }

@@ -38,10 +38,12 @@ spec:
             - name: SSH_PRIVATE_KEY
               valueFrom:
                 secretKeyRef:
-                  name: hcloud 
-                  key: ssh_key
+                  name: sshkey 
+                  key: private-key 
             - name: HCLOUD_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: hcloud 
                   key: token 
+            - name: JOIN_COMMAND
+              value: "$JOIN_COMMAND"
