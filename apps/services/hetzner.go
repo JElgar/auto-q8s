@@ -51,6 +51,10 @@ func InitNode(response hcloud.ServerCreateResult, joinCommand string) {
     host := response.Server.PublicNet.IPv4.IP.String()
     port := "22"
     client, err := ssh.Dial("tcp", host+":"+port, config)
+    if err != nil {
+		log.Fatal("unable to dial", err)
+    }
+
     defer client.Close()
     fmt.Println("Created clinet")
 
