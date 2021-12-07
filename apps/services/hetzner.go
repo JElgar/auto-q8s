@@ -52,6 +52,7 @@ func InitNode(response hcloud.ServerCreateResult, joinCommand string) {
     port := "22"
     client, err := ssh.Dial("tcp", host+":"+port, config)
     if err != nil {
+        log.Println(err)
 		log.Fatal("unable to dial", err)
     }
 
