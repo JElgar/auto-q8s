@@ -6,13 +6,13 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"time"
-    "io/ioutil"
+	// "time"
+    // "io/ioutil"
 
 	"github.com/hetznercloud/hcloud-go/hcloud"
 	"github.com/nu7hatch/gouuid"
     // "github.com/sfreiberg/simplessh"
-    "golang.org/x/crypto/ssh"
+    // "golang.org/x/crypto/ssh"
 )
 
 type Hetzner struct {
