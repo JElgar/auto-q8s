@@ -16,6 +16,9 @@ metadata:
   name: istio-controlplane
 spec:
   profile: default
+  meshConfig:
+    outboundTrafficPolicy: 
+      mode: ALLOW_ANY
 EOF
 kubectl label namespace default istio-injection=enabled
 
@@ -42,3 +45,10 @@ kubectl apply -f "https://github.com/rabbitmq/cluster-operator/releases/latest/d
 
 # Create ssh key
 kubectl create secret generic sshkey --from-file=private-key=/home/$USER/.ssh/id_rsa --from-file=public-key=/home/$USER/.ssh/id_rsa.pub
+
+# Allow default to do admin things
+kubectl create clusterrolebinding default-admin --clusterrole=cluster-admin --serviceaccount=default:default
+
+./rabbitmq/init.sh
+../apps/producer/infra/init.sh
+../apps/scaler/infra/init.sh

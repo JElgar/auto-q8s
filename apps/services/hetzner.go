@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"time"
+    "io/ioutil"
 
 	"github.com/hetznercloud/hcloud-go/hcloud"
 	"github.com/nu7hatch/gouuid"
@@ -31,7 +32,13 @@ func InitNode(response hcloud.ServerCreateResult, joinCommand string) {
     time.Sleep(time.Second * 20)
     fmt.Println("The private key is: ")
     fmt.Println(os.Getenv("SSH_PRIVATE_KEY"))
-    key := []byte(os.Getenv("SSH_PRIVATE_KEY"))
+
+    key, err := ioutil.ReadFile("/etc/ssh-key/private-key")
+    if err != nil {
+        log.Println(err)
+        log.Fatalln("Failed to open private key file")
+    }
+    // key := []byte(os.Getenv("SSH_PRIVATE_KEY"))
 
     signer, err := ssh.ParsePrivateKey(key)
 	if err != nil {
