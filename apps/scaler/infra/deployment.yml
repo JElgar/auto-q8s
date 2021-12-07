@@ -16,7 +16,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
-      # hostNetwork: true
+      hostNetwork: true
       volumes:
       - name: ssh-key-volume
         secret:
