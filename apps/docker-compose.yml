@@ -13,7 +13,7 @@ services:
       context: .
       dockerfile: producer/Dockerfile
     ports:
-      - '10000:10000'
+      - '3000:3000'
     networks:
       - rabbitmq
     environment:
@@ -30,6 +30,22 @@ services:
       dockerfile: consumer/Dockerfile
     networks:
       - rabbitmq
+    environment:
+      - RMQ_USER=guest
+      - RMQ_PASSWORD=guest
+      - RMQ_HOST=rabbitmq
+      - RMQ_PORT=5672
+    depends_on:
+      - rabbitmq
+  
+  scaler:
+    build:
+      context: .
+      dockerfile: scaler/Dockerfile
+    networks:
+      - rabbitmq
+    env_file:
+      - ../.env
     environment:
       - RMQ_USER=guest
       - RMQ_PASSWORD=guest

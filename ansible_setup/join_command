@@ -1,0 +1,1 @@
+kubeadm join k8s.james.joebryan.uk:6443 --token vta0qq.ukv09nf7paonpn9q --discovery-token-ca-cert-hash sha256:f812640e7d6612f34e5578d06f308a7e5b8cfbd5625be2a3d6781ecfbae93534 

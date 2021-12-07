@@ -1,7 +1,7 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
-  name: nginx-gateway
+  name: rabbit-gateway
 spec:
   selector:
     istio: ingressgateway
@@ -11,26 +11,26 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - "*" 
+    - queue.$CLUSTER_BASE_URL
 
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: nginx-test-vs
+  name: queue-vs
   namespace: default 
 spec:
   hosts:
-  - "*"
+  - queue.$CLUSTER_BASE_URL
   gateways:
-  - nginx-gateway
+  - rabbit-gateway
   http:
   - match:
     - uri:
         prefix: /
     route:
     - destination:
-        host: producer-service
+        host:  queue
         port:
           number:
-            10000
+            15672

@@ -1,0 +1,6 @@
+- name:
+  debug:
+    msg: "JOIN COMMAND: {{ hostvars['K8S_DATA']['join_command'] }} --control-plane --certificate-key {{ hostvars['K8S_DATA']['join_cert'] }}"
+
+- name: Join cluster as control plane node
+  shell: "{{ hostvars['K8S_DATA']['join_command'] }} --control-plane --certificate-key {{ hostvars['K8S_DATA']['join_cert'] }}"

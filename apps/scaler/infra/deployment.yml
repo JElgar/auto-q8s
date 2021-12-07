@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: producer-deployment
+  name: scaler-deployment
   labels:
-    app: producer
+    app: scaler 
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: producer
+      app: scaler 
   template:
     metadata:
       labels: 
-        app: producer
+        app: scaler 
     spec:
       containers:
-        - name: producer 
-          image: ghcr.io/jelgar/auto-q8s/producer:main
+        - name: scaler 
+          image: ghcr.io/jelgar/auto-q8s/scaler:main
           ports:
             - containerPort: 3000
           imagePullPolicy: Always
@@ -35,3 +35,15 @@ spec:
               value: "queue"
             - name: RMQ_PORT
               value: "5672"
+            - name: SSH_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: sshkey 
+                  key: private-key 
+            - name: HCLOUD_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hcloud 
+                  key: token 
+            - name: JOIN_COMMAND
+              value: "$JOIN_COMMAND"

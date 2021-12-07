@@ -2,3 +2,4 @@
 ansible_setup/infra.yml
 ansible_setup/inventory.ini
 k8s/istio-1.12.0
+.env
