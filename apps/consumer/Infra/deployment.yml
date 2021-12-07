@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consumer-deployment
+  labels:
+    app: consumer
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: consumer
+  template:
+    metadata:
+      labels: 
+        app: consumer
+    spec:
+      containers:
+        - name: consumer
+          image: ghcr.io/jelgar/auto-q8s/consumer:main
+          ports:
+            - containerPort: 3000
+          imagePullPolicy: Always
+          env:
+            - name: RMQ_USER
+              valueFrom:
+                secretKeyRef:
+                  name: queue-default-user
+                  key: username
+            - name: RMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: queue-default-user
+                  key: password
+            - name: RMQ_HOST
+              value: "queue"
+            - name: RMQ_PORT
+              value: "5672"
