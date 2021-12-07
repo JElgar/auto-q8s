@@ -3,7 +3,7 @@ COPY . /app
 WORKDIR /app
 RUN go build -o /go/bin/app scaler/main.go
 FROM alpine:3.10
-RUN apk update && apk add bash && apk add curl
+RUN apk update && apk add bash && apk add curl && apk add openssh-client
 WORKDIR app
 COPY --from=GO_BUILD /go/bin/app ./
 CMD ./app
