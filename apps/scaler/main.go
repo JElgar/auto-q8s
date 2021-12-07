@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"sync"
+	"time"
 )
 
 type Env struct {
@@ -34,6 +35,11 @@ func main() {
     }
 
     joinCommand := os.Getenv("JOIN_COMMAND")
+
+    for {
+        fmt.Printf("Idling")
+        time.Sleep(time.Second * 30)
+    }
 
     // Do k8s stuff
     // for {

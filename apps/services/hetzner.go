@@ -113,9 +113,18 @@ func (hetzner *Hetzner) CreateNode(joinCommand string) {
     InitNode(response, joinCommand)
 }
 
-func (hetzner *Hetzner) DeleteNode(name string) {
+func (hetzner *Hetzner) GetNodes() ([]*hcloud.Server) {
+    nodes, err := hetzner.Client.Server.All(context.Background())
+    if err != nil {
+        fmt.Println("Failed to get nodes")
+        return []*hcloud.Server{}
+    }
+    return nodes
+}
+
+func (hetzner *Hetzner) DeleteNode(id int) {
     server := &hcloud.Server{
-        Name: name,
+        ID: id,
     }
     _, err := hetzner.Client.Server.Delete(context.Background(), server)
     if err != nil {
