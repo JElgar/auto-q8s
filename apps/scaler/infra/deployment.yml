@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scaler-deployment
+  labels:
+    app: scaler 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scaler 
+  template:
+    metadata:
+      labels: 
+        app: scaler 
+    spec:
+      containers:
+        - name: scaler 
+          image: ghcr.io/jelgar/auto-q8s/scaler:main
+          ports:
+            - containerPort: 3000
+          imagePullPolicy: Always
+          env:
+            - name: RMQ_USER
+              valueFrom:
+                secretKeyRef:
+                  name: queue-default-user
+                  key: username
+            - name: RMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: queue-default-user
+                  key: password
+            - name: RMQ_HOST
+              value: "queue"
+            - name: RMQ_PORT
+              value: "5672"
+            - name: SSH_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hcloud 
+                  key: ssh_key
+            - name: HCLOUD_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hcloud 
+                  key: token 

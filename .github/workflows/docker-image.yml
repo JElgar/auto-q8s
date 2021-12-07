@@ -39,6 +39,12 @@ jobs:
       uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
       with:
         images: ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/producer
+
+    - name: Extract metadata (tags, labels) for scaler 
+      id: scaler-meta
+      uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.REPO_NAME }}/scaler
         
     - name: Build and push consumer docker image
       uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
@@ -57,4 +63,14 @@ jobs:
         tags: ${{ steps.producer-meta.outputs.tags }}
         labels: ${{ steps.producer-meta.outputs.labels }}
         push: true
+    
+    - name: Build and push scaler docker image
+      uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+      with:
+        context: apps 
+        file: apps/scaler/Dockerfile
+        tags: ${{ steps.scaler-meta.outputs.tags }}
+        labels: ${{ steps.scaler-meta.outputs.labels }}
+        push: true
+
 

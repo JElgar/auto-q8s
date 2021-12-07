@@ -1,5 +1,5 @@
 number_of_master_nodes = 3
-number_of_worker_nodes = 2
+number_of_worker_nodes = 0
 master_node_name_prefix = "master-node"
 worker_node_name_prefix = "worker-node"
 master_node_size = "cpx31"
