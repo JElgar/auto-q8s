@@ -1,19 +1,12 @@
 package services
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"log"
-	"net"
 	"os"
 	"time"
-    "strconv"
-    "io"
 
-	"golang.org/x/crypto/ssh"
-
-	scp "github.com/bramvdbogaerde/go-scp"
 	"github.com/hetznercloud/hcloud-go/hcloud"
 	"github.com/nu7hatch/gouuid"
     "github.com/sfreiberg/simplessh"
@@ -33,195 +26,61 @@ func HetznerSetup() *Hetzner {
     return &Hetzner{Client: client} 
 }
 
-func CreateSSHSession(
-    host net.IP,
-    user string,
-    password string,
-    port int,
-) (*ssh.Session) {
-	conf := &ssh.ClientConfig{
-		User:            user,
-		Auth: []ssh.AuthMethod{
-			ssh.Password(password),
-		},
-        HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-    }
-    var conn *ssh.Client
-
-    hostWithPort := fmt.Sprintf("%s:22", host.String())
-    conn, err := ssh.Dial("tcp", hostWithPort, conf)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	defer conn.Close()
-
-    session, err := conn.NewSession()
-	if err != nil {
-		fmt.Println(err.Error())
-    }
-
-    return session
-}
-
-func CopyInitScriptToNode(
-    host net.IP,
-    user string,
-    password string,
-    port int,
-) {
-    workingPath, _ := os.Getwd()
-    filePath := fmt.Sprintf("%s/scaler/init_worker.sh", workingPath)
-    fmt.Println("File path")
-    fmt.Println(filePath)
-
-
-    fmt.Println("Connection host")
-    fmt.Println(fmt.Sprintf("%s:%s", host.String(), strconv.Itoa(port)))
-    client := scp.NewClient(
-        fmt.Sprintf("%s:22", host.String()), 
-        &ssh.ClientConfig{
-		    User: user,
-		    Auth: []ssh.AuthMethod{
-			    ssh.Password(password),
-		    },
-            HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-        },
-    )
-    err := client.Connect()
-	if err != nil {
-		fmt.Println("Couldn't establish a connection to the remote server ", err)
-		return
-    }
-
-    fmt.Println("Created client")
-
-    file, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
-    if err != nil { 
-        fmt.Printf("Could not connect to server: %s", err)
-    }
-
-    defer client.Close()
-    defer file.Close()
-
-	fmt.Println("Copying file")
-    err = client.CopyFile(file, "/test.sh", "0655")
-    if err != nil {
-		fmt.Println("Error while copying file ", err)
-		fmt.Println(err)
-    }
-	fmt.Println("Copied")
-}
-
-func runCommand(cmd string, conn *ssh.Client) {
-    sess, err := conn.NewSession()
-    if err != nil {
-        panic(err)
-    }
-    defer sess.Close()
-    sessStdOut, err := sess.StdoutPipe()
-    if err != nil {
-        panic(err)
-    }
-    go io.Copy(os.Stdout, sessStdOut)
-    sessStderr, err := sess.StderrPipe()
-    if err != nil {
-        panic(err)
-    }
-    go io.Copy(os.Stderr, sessStderr)
-
-    var stdoutBuf bytes.Buffer
-    sess.Stdout = &stdoutBuf
-    err = sess.Run(cmd) // eg., /usr/bin/whoami
-    if err != nil {
-        panic(err)
-    }
-
-    fmt.Println("Output:")
-    fmt.Println(sessStdOut)
-    fmt.Println(fmt.Sprintf("%s -> %s", "hostname", stdoutBuf.String()))
-    fmt.Println("Error:")
-    fmt.Println(sessStderr)
-}
-
-func TryThing() error {
+func InitNode(response hcloud.ServerCreateResult) {
+    time.Sleep(time.Second * 20)
     var client *simplessh.Client
     var err error
 
-    if client, err = simplessh.ConnectWithPassword("65.108.147.8:22", "root", "strongpassword"); err != nil {
-        return err
+    host := fmt.Sprintf("%s:22", response.Server.PublicNet.IPv4.IP.String())
+    homedir, err := os.UserHomeDir()
+    if client, err = simplessh.ConnectWithKeyFile(host, "root", fmt.Sprintf("%s/.ssh/id_rsa", homedir); err != nil {
+        fmt.Println(err)
+        return
     }
-
     defer client.Close()
 
-    // Now run the commands on the remote machine:
+    // Now run the init script from github 
     _, err = client.Exec("bash <(curl -s https://raw.githubusercontent.com/JElgar/auto-q8s/main/apps/scaler/init_worker.sh)"); 
     if err != nil {
         log.Println(err)
     }
-
-    return nil
 }
 
-func (hetzner *Hetzner) Test() {
-    TryThing()
-	// conf := &ssh.ClientConfig{
-	// 	User: "root",
-	// 	Auth: []ssh.AuthMethod{
-	// 		ssh.Password("strongpassword"),
-	// 	},
-    //     HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-    // }
-    // var conn *ssh.Client
+func (hetzner *Hetzner) getSshKeyId() (*hcloud.SSHKey, error) {
+    options := hcloud.SSHKeyListOpts{
+        Name: "jelgar@JamesLaptop",
+    }
 
-    // conn, err := ssh.Dial("tcp", "65.108.147.8:22", conf)
-	// if err != nil {
-	// 	fmt.Println(err.Error())
-	// }
-
-    // runCommand("ls", conn)
-}
-
-func InitNode(response hcloud.ServerCreateResult) {
-    time.Sleep(time.Second * 30)
-    // CopyInitScriptToNode(
-    //     response.Server.PublicNet.IPv4.IP,
-    //     "root",
-    //     response.RootPassword,
-    //     22,
-    // )
-
-    session := CreateSSHSession(
-        response.Server.PublicNet.IPv4.IP,
-        "root",
-        response.RootPassword,
-        22,
-    )
-    defer session.Close()
-
-    var b bytes.Buffer  // import "bytes"
-    session.Stdout = &b // get output
-    // you can also pass what gets input to the stdin, allowing you to pipe
-    // content from client to server
-    //      session.Stdin = bytes.NewBufferString("My input")
-
-    // Finally, run the command
-    err := session.Run("bash <(curl -s https://raw.githubusercontent.com/JElgar/auto-q8s/main/apps/scaler/init_worker.sh)")
-    fmt.Printf("Stuff happened: %s, %s", b.String(), err)
+    response, err := hetzner.Client.SSHKey.AllWithOpts(context.Background(), options)
+    if err != nil || len(response) == 0 {
+        fmt.Println("Could not get ssh key")
+        return nil, err
+    }
+    return response[0], nil
 }
 
 func (hetzner *Hetzner) CreateNode() {
     uuid, _ := uuid.NewV4()
+    sshKey, err := hetzner.getSshKeyId()
+    if err != nil {
+        return
+    }
+    sshKeys := make([]*hcloud.SSHKey, 1)
+    sshKeys[0] = sshKey 
+
     options := hcloud.ServerCreateOpts{
         Name: fmt.Sprintf("worker-node-%s", uuid),
         Image: &hcloud.Image{Name: "ubuntu-20.04"},
         ServerType: &hcloud.ServerType{Name: "cx11"},
+        SSHKeys: sshKeys,
     }
     response, _, err := hetzner.Client.Server.Create(context.Background(), options)
     if err != nil {
         log.Printf("Error creating node: %s", err)
-    } else {
-        log.Println("Node created")
+        return
     }
+
+    log.Println("Node created")
     InitNode(response)
 }
 
