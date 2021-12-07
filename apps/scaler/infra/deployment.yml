@@ -15,12 +15,20 @@ spec:
         app: scaler 
     spec:
       hostNetwork: true
+      volumes:
+      - name: ssh-key-volume
+        secret:
+          secretName: sshkey
+          defaultMode: 256
       containers:
         - name: scaler 
           image: ghcr.io/jelgar/auto-q8s/scaler:main
           ports:
             - containerPort: 3000
           imagePullPolicy: Always
+          volumeMounts:
+            - name: ssh-key-volume
+              mountPath: "/etc/ssh-key"
           env:
             - name: RMQ_USER
               valueFrom:
@@ -48,3 +56,5 @@ spec:
                   key: token 
             - name: JOIN_COMMAND
               value: "$JOIN_COMMAND"
+            - name: CHECK_DELAY
+              value: 600

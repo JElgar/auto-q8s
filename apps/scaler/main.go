@@ -7,6 +7,7 @@ import (
 	"os"
 	"sync"
 	"time"
+    "strconv"
 )
 
 type Env struct {
@@ -36,13 +37,8 @@ func main() {
 
     joinCommand := os.Getenv("JOIN_COMMAND")
 
-    for {
-        fmt.Printf("Idling")
-        time.Sleep(time.Second * 30)
-    }
-
     // Do k8s stuff
-    // for {
+    for {
         log.Printf("Checking")
         currentNumberOfNodes := services.NumberOfNodes()
         lengthOfQueue := env.Rmq.QueueLength()
@@ -70,6 +66,12 @@ func main() {
         log.Print("Waiting for nodes to be created and inited")
         wg.Wait()
         log.Println("Done")
-    // }
+
+        delay, err := strconv.Atoi(os.Getenv("CHECK_DELAY"))
+        if err == nil {
+            fmt.Println("Delaying next check")
+            time.Sleep(time.Second * time.Duration(delay))
+        }
+    }
 
 }
