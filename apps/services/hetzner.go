@@ -134,6 +134,8 @@ func (hetzner *Hetzner) CreateNode(joinCommand string) {
     actionId := response.Action.ID
     for {
         action := hetzner.GetAction(actionId)
+        log.Println("Command: ")
+        log.Println(action.Command)
         if action.Status == hcloud.ActionStatusRunning {
             fmt.Println("Running")
         } else if action.Status == hcloud.ActionStatusError {
