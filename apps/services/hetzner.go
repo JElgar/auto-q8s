@@ -130,6 +130,34 @@ func (hetzner *Hetzner) CreateNode(joinCommand string) {
     log.Println("Node created")
     log.Println(response)
     // InitNode(response, joinCommand)
+   
+    actionId := response.Action.ID
+    for {
+        action := hetzner.GetAction(actionId)
+        if action.Status == hcloud.ActionStatusRunning {
+            fmt.Println("Running")
+        } else if action.Status == hcloud.ActionStatusError {
+            fmt.Println("Error")
+            fmt.Println(action.ErrorMessage)
+            fmt.Println(action.ErrorCode)
+            break
+        } else if action.Status == hcloud.ActionStatusSuccess {
+            fmt.Println("Success")
+            break
+        } else {
+            fmt.Println("Unknown status")
+        }
+    }  
+}
+
+func (hetzner *Hetzner) GetAction(actionId int) *hcloud.Action {
+    action, response, err := hetzner.Client.Action.GetByID(context.Background(), actionId)
+    if err != nil {
+        log.Println(err)
+        log.Println(response)
+        log.Println("Failed to get action")
+    }
+    return action
 }
 
 func (hetzner *Hetzner) GetNodes() ([]*hcloud.Server) {
