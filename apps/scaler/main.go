@@ -4,11 +4,12 @@ import (
 	"apps/services"
 	"fmt"
 	"log"
+	"math"
 	"os"
+	"os/exec"
+	"strconv"
 	"sync"
 	"time"
-    "strconv"
-	"os/exec"
 )
 
 type Env struct {
@@ -19,28 +20,7 @@ type Env struct {
 
 func main() {
 
-    log.Println("Running test ssh")
-    cmd := fmt.Sprintf("ssh -i /etc/ssh-key/private-key %s -o StrictHostKeyChecking=no 'ls -al'", "65.108.147.7")
-    out, err := exec.Command("bash", "-c", cmd).Output()
-    if err != nil {
-        log.Println("Something went wrong")
-        log.Println(err)
-    }
-    fmt.Println(out)
-    log.Println("Ran test ssh")
-
-    fmt.Println("Getting hetzner stuff")
-    fmt.Println(os.Getenv("HCLOUD_TOKEN"))
-
     hetzner := services.HetznerSetup();
-    sshKey, err := hetzner.GetSshKeyId()
-
-    if err != nil {
-        log.Panicln("Cannot get key")
-    }
-    fmt.Println("Got the id!")
-    fmt.Println(sshKey)
-
     rmq := services.RabbitmqSetup()
     k8sEnv := services.InitK8s()
     env := &Env{
@@ -57,8 +37,8 @@ func main() {
         currentNumberOfNodes := env.K8s.NumberOfNodes()
         lengthOfQueue := env.Rmq.QueueLength()
     
-        numberOfNodesToMake := int((lengthOfQueue / 100) - currentNumberOfNodes)
-        deploymentSize := lengthOfQueue / 10
+        numberOfNodesToMake := int(math.Ceil(float64(lengthOfQueue) / float64(100))) - currentNumberOfNodes
+        deploymentSize := int(math.Max(math.Ceil(float64(lengthOfQueue) / float64(10)), float64(3)))
         if numberOfNodesToMake > 10 {
             log.Panicf("Cannot create %d!", numberOfNodesToMake)
         }
