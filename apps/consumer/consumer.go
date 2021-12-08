@@ -2,6 +2,7 @@ package main
 
 import (
 	"apps/services"
+	"encoding/json"
 	"fmt"
 	"log"
 	"runtime"
@@ -29,6 +30,8 @@ func idle() {
 
 func main() {
     rmq := services.RabbitmqSetup()
+    dynamo := services.InitDynamo()
+
     fmt.Println("Here we go")
 
     for d := range rmq.Consumer() {
@@ -36,5 +39,11 @@ func main() {
         idle()
         log.Printf("Done work on: %s", d.Body)
         rmq.Channel.Ack(d.DeliveryTag, false)
+
+        var item *services.ResultItem
+        json.Unmarshal(d.Body, item)
+
+        item.Status = "DONE"
+        dynamo.PutItem(item)
     }
 }

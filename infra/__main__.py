@@ -8,6 +8,7 @@ from pulumi_aws.ec2.key_pair import KeyPair
 from pulumi_aws.ec2.security_group import SecurityGroup
 import pulumi_cloudflare as cloudflare
 import pulumi_hcloud as hcloud
+from output import *
 
 import constants
 
