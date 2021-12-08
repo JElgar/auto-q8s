@@ -34,7 +34,7 @@ func main() {
     // Do k8s stuff
     for {
         log.Printf("Checking")
-        currentNumberOfNodes := env.K8s.NumberOfNodes()
+        currentNumberOfNodes := env.K8s.GetNodeCount()
         lengthOfQueue := env.Rmq.QueueLength()
     
         numberOfNodesToMake := int(math.Ceil(float64(lengthOfQueue) / float64(100))) - currentNumberOfNodes
@@ -55,6 +55,14 @@ func main() {
                     env.Hetzner.CreateNode(joinCommand)
                 }()
             }
+        }
+
+        // Because 3 master nodes TODO do not hard code this
+        if numberOfNodesToMake < -3 {
+            fmt.Printf("Need to delete nodes")
+            // If we want to delete 4 nodes we should actually just delete one.
+            // So we add +3(for master nodes) and negate the value
+            k8sEnv.DeleteNodes(-(numberOfNodesToMake + 3), hetzner)
         }
        
         // Wait till all new nodes have initalised

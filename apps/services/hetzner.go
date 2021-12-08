@@ -114,6 +114,28 @@ func (hetzner *Hetzner) GetNodes() ([]*hcloud.Server) {
     return nodes
 }
 
+func (hetzner *Hetzner) GetNodeByIp(ip string) *hcloud.Server {
+    nodes := hetzner.GetNodes()
+    for _, node := range nodes {
+        if node.PublicNet.IPv4.IP.String() == ip {
+            return node
+        }
+    }
+    return nil
+}
+
+func (hetzner *Hetzner) GetNodeByName(name string) *hcloud.Server {
+    opts := hcloud.ServerListOpts{
+        Name: name,
+    }
+    nodes, err := hetzner.Client.Server.AllWithOpts(context.Background(), opts)
+    if err != nil || len(nodes) == 0 {
+        fmt.Println("Failed to get nodes")
+        return nil 
+    }
+    return nodes[0]
+}
+
 func (hetzner *Hetzner) DeleteNode(id int) {
     server := &hcloud.Server{
         ID: id,
