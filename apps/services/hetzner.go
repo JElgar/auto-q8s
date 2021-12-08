@@ -131,23 +131,25 @@ func (hetzner *Hetzner) CreateNode(joinCommand string) {
     log.Println(response)
     // InitNode(response, joinCommand)
    
-    actionId := response.Action.ID
+    actions := response.NextActions
     for {
-        action := hetzner.GetAction(actionId)
-        log.Println("Command: ")
-        log.Println(action.Command)
-        if action.Status == hcloud.ActionStatusRunning {
-            fmt.Println("Running")
-        } else if action.Status == hcloud.ActionStatusError {
-            fmt.Println("Error")
-            fmt.Println(action.ErrorMessage)
-            fmt.Println(action.ErrorCode)
-            break
-        } else if action.Status == hcloud.ActionStatusSuccess {
-            fmt.Println("Success")
-            break
-        } else {
-            fmt.Println("Unknown status")
+        for _, action := range actions {
+            action = hetzner.GetAction(action.ID)
+            log.Println("Command: ")
+            log.Println(action.Command)
+            if action.Status == hcloud.ActionStatusRunning {
+                fmt.Println("Running")
+            } else if action.Status == hcloud.ActionStatusError {
+                fmt.Println("Error")
+                fmt.Println(action.ErrorMessage)
+                fmt.Println(action.ErrorCode)
+                break
+            } else if action.Status == hcloud.ActionStatusSuccess {
+                fmt.Println("Success")
+                break
+            } else {
+                fmt.Println("Unknown status")
+            }
         }
     }  
 }
