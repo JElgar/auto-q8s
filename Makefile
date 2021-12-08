@@ -8,3 +8,4 @@ up: ## Spin up cluster
 
 down: ## Destroy the cluster
 	pulumi destroy -C infra
+	go run apps/delete-workers.go

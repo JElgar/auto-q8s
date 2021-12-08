@@ -14,6 +14,7 @@ import (
 type Env struct {
     Rmq *services.Rmq
     Hetzner *services.Hetzner
+    K8s *services.K8sEnv
 }
 
 func main() {
@@ -41,9 +42,11 @@ func main() {
     fmt.Println(sshKey)
 
     rmq := services.RabbitmqSetup()
+    k8sEnv := services.InitK8s()
     env := &Env{
         Rmq: rmq,
         Hetzner: hetzner,
+        K8s: k8sEnv,
     }
 
     joinCommand := os.Getenv("JOIN_COMMAND")
@@ -51,12 +54,12 @@ func main() {
     // Do k8s stuff
     for {
         log.Printf("Checking")
-        currentNumberOfNodes := services.NumberOfNodes()
+        currentNumberOfNodes := env.K8s.NumberOfNodes()
         lengthOfQueue := env.Rmq.QueueLength()
     
         numberOfNodesToMake := int((lengthOfQueue / 100) - currentNumberOfNodes)
-        numberOfNodesToMake = 1 
-        if numberOfNodesToMake > 20 {
+        deploymentSize := lengthOfQueue / 10
+        if numberOfNodesToMake > 10 {
             log.Panicf("Cannot create %d!", numberOfNodesToMake)
         }
         log.Printf("Number of nodes in cluster: %d", currentNumberOfNodes)
@@ -78,6 +81,8 @@ func main() {
         log.Print("Waiting for nodes to be created and inited")
         wg.Wait()
         log.Println("Done")
+
+        env.K8s.ScaleDeployment(deploymentSize, "consumer-deployment")
 
         delay, err := strconv.Atoi(os.Getenv("CHECK_DELAY"))
         if err == nil {

@@ -1,1 +1,1 @@
-kubeadm join k8s.james5.joebryan.uk:6443 --token bix608.srxv5dke2s93ero8 --discovery-token-ca-cert-hash sha256:752791fef1ad6abe11072ed2db4628c7ea1615e0623257a2f6cc5b3167eb10a9 
+kubeadm join k8s.james.joebryan.uk:6443 --token ybmley.q481g37es6jr51aw --discovery-token-ca-cert-hash sha256:7e2bea8558c189e7f2cc08f8e99310b77d678a35e5457627b9f77993aa2ef496 
