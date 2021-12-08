@@ -6,7 +6,6 @@ import (
 	"log"
 	"math"
 	"os"
-	"os/exec"
 	"strconv"
 	"sync"
 	"time"
