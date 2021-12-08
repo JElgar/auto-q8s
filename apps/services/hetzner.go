@@ -119,7 +119,7 @@ func (hetzner *Hetzner) CreateNode(joinCommand string) {
         Image: &hcloud.Image{Name: "ubuntu-20.04"},
         ServerType: &hcloud.ServerType{Name: "cx11"},
         SSHKeys: sshKeys,
-        UserData: "#cloud-config\nruncmd:\n- touch test-cloudinit.txt\n- bash <(curl -s https://raw.githubusercontent.com/JElgar/auto-q8s/main/apps/scaler/init_worker.sh)", 
+        UserData: "#cloud-config\nruncmd:\n- touch test-cloudinit.txt\n- curl -s https://raw.githubusercontent.com/JElgar/auto-q8s/main/apps/scaler/init_worker.sh -o init.sh\n- chmod +x init.sh\n- ./init.sh", 
     }
     response, _, err := hetzner.Client.Server.Create(context.Background(), options)
     if err != nil {
