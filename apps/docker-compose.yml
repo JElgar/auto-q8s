@@ -53,6 +53,8 @@ services:
       - RMQ_PORT=5672
     depends_on:
       - rabbitmq
+    volumes:
+      - ~/.ssh/id_rsa:/etc/ssh-key/private-key:ro
 
   rabbitmq:
     image: rabbitmq:3-management-alpine

@@ -6,6 +6,9 @@ import (
 	"log"
 	"os"
 	"sync"
+	"time"
+    "strconv"
+	"os/exec"
 )
 
 type Env struct {
@@ -14,6 +17,16 @@ type Env struct {
 }
 
 func main() {
+
+    log.Println("Running test ssh")
+    cmd := fmt.Sprintf("ssh -i /etc/ssh-key/private-key %s -o StrictHostKeyChecking=no 'ls -al'", "65.108.147.7")
+    out, err := exec.Command("bash", "-c", cmd).Output()
+    if err != nil {
+        log.Println("Something went wrong")
+        log.Println(err)
+    }
+    fmt.Println(out)
+    log.Println("Ran test ssh")
 
     fmt.Println("Getting hetzner stuff")
     fmt.Println(os.Getenv("HCLOUD_TOKEN"))
@@ -36,12 +49,13 @@ func main() {
     joinCommand := os.Getenv("JOIN_COMMAND")
 
     // Do k8s stuff
-    // for {
+    for {
         log.Printf("Checking")
         currentNumberOfNodes := services.NumberOfNodes()
         lengthOfQueue := env.Rmq.QueueLength()
     
         numberOfNodesToMake := int((lengthOfQueue / 100) - currentNumberOfNodes)
+        numberOfNodesToMake = 1 
         if numberOfNodesToMake > 20 {
             log.Panicf("Cannot create %d!", numberOfNodesToMake)
         }
@@ -64,6 +78,15 @@ func main() {
         log.Print("Waiting for nodes to be created and inited")
         wg.Wait()
         log.Println("Done")
-    // }
+
+        delay, err := strconv.Atoi(os.Getenv("CHECK_DELAY"))
+        if err == nil {
+            fmt.Println("Delaying next check")
+            time.Sleep(time.Second * time.Duration(delay))
+        } else {
+            fmt.Printf("Failed to parse check delay %s", os.Getenv("CHECK_DELAY"))
+            time.Sleep(time.Minute * 2)
+        }
+    }
 
 }

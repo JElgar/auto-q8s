@@ -25,6 +25,7 @@ func (env *Env) handlePostRequest(w http.ResponseWriter, r *http.Request){
     resp := make(map[string]string)
     resp["message"] = "Published to queue"
 
+    fmt.Println("Handled request to publish")
     w.WriteHeader(http.StatusOK)
     jsonResp, _ := json.Marshal(resp)
     w.Write(jsonResp)

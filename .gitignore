@@ -1,5 +1,6 @@
 .idea/
 ansible_setup/infra.yml
 ansible_setup/inventory.ini
+ansible_setup/join_command
 k8s/istio-1.12.0
 .env

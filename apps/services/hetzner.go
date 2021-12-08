@@ -7,10 +7,13 @@ import (
 	"os"
 	"time"
 
+	// "time"
+	// "io/ioutil"
+
 	"github.com/hetznercloud/hcloud-go/hcloud"
 	"github.com/nu7hatch/gouuid"
-    // "github.com/sfreiberg/simplessh"
-    "golang.org/x/crypto/ssh"
+	// "github.com/sfreiberg/simplessh"
+	// "golang.org/x/crypto/ssh"
 )
 
 type Hetzner struct {
@@ -25,52 +28,6 @@ func HetznerSetup() *Hetzner {
         ),
     )
     return &Hetzner{Client: client} 
-}
-
-func InitNode(response hcloud.ServerCreateResult, joinCommand string) {
-    time.Sleep(time.Second * 20)
-    fmt.Println("The private key is: ")
-    fmt.Println(os.Getenv("SSH_PRIVATE_KEY"))
-    key := []byte(os.Getenv("SSH_PRIVATE_KEY"))
-
-    signer, err := ssh.ParsePrivateKey(key)
-	if err != nil {
-		log.Fatalf("unable to parse private key: %v", err)
-	}
-    fmt.Println("Done signer")
-
-	config := &ssh.ClientConfig{
-		User: "root",
-		Auth: []ssh.AuthMethod{
-			// Add in password check here for moar security.
-			ssh.PublicKeys(signer),
-		},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-    }
-
-    host := response.Server.PublicNet.IPv4.IP.String()
-    port := "22"
-    client, err := ssh.Dial("tcp", host+":"+port, config)
-    if err != nil {
-        log.Println(err)
-		log.Fatal("unable to dial", err)
-    }
-
-    defer client.Close()
-    fmt.Println("Created clinet")
-
-	session, err := client.NewSession()
-	if err != nil {
-		log.Fatal("unable to create SSH session: ", err)
-    }
-    defer session.Close()
-    fmt.Println("Created session")
-
-    session.Run("bash <(curl -s https://raw.githubusercontent.com/JElgar/auto-q8s/main/apps/scaler/init_worker.sh)"); 
-    fmt.Println("Ran init")
-   
-    session.Run(joinCommand); 
-    fmt.Println("Ran join")
 }
 
 func (hetzner *Hetzner) GetSshKeyId() (*hcloud.SSHKey, error) {
@@ -97,11 +54,14 @@ func (hetzner *Hetzner) CreateNode(joinCommand string) {
     sshKeys := make([]*hcloud.SSHKey, 1)
     sshKeys[0] = sshKey 
 
+    log.Printf("Join command: ")
+    log.Printf(joinCommand)
     options := hcloud.ServerCreateOpts{
         Name: fmt.Sprintf("worker-node-%s", uuid),
         Image: &hcloud.Image{Name: "ubuntu-20.04"},
         ServerType: &hcloud.ServerType{Name: "cx11"},
         SSHKeys: sshKeys,
+        UserData: fmt.Sprintf("#cloud-config\nruncmd:\n- touch test-cloudinit.txt\n- curl -s https://raw.githubusercontent.com/JElgar/auto-q8s/main/apps/scaler/init_worker.sh -o init.sh\n- chmod +x init.sh\n- ./init.sh\n- echo '%s' > join.sh\n- chmod +x join.sh\n- ./join.sh > join_output.txt", joinCommand), 
     }
     response, _, err := hetzner.Client.Server.Create(context.Background(), options)
     if err != nil {
@@ -110,12 +70,53 @@ func (hetzner *Hetzner) CreateNode(joinCommand string) {
     }
 
     log.Println("Node created")
-    InitNode(response, joinCommand)
+    log.Println(response)
+    // InitNode(response, joinCommand)
+  
+    // Wait till server is started 
+    for {
+        action := hetzner.GetAction(response.Action.ID)
+        log.Println("Command: ")
+        log.Println(action.Command)
+        if action.Status == hcloud.ActionStatusRunning {
+            log.Println("Running")
+        } else if action.Status == hcloud.ActionStatusError {
+            log.Println("Error")
+            log.Println(action.ErrorMessage)
+            log.Println(action.ErrorCode)
+            break
+        } else if action.Status == hcloud.ActionStatusSuccess {
+            log.Println("Success")
+            break
+        } else {
+            log.Println("Unknown status")
+        }
+        time.Sleep(time.Second * 10)
+    }  
 }
 
-func (hetzner *Hetzner) DeleteNode(name string) {
+func (hetzner *Hetzner) GetAction(actionId int) *hcloud.Action {
+    action, response, err := hetzner.Client.Action.GetByID(context.Background(), actionId)
+    if err != nil {
+        log.Println(err)
+        log.Println(response)
+        log.Println("Failed to get action")
+    }
+    return action
+}
+
+func (hetzner *Hetzner) GetNodes() ([]*hcloud.Server) {
+    nodes, err := hetzner.Client.Server.All(context.Background())
+    if err != nil {
+        fmt.Println("Failed to get nodes")
+        return []*hcloud.Server{}
+    }
+    return nodes
+}
+
+func (hetzner *Hetzner) DeleteNode(id int) {
     server := &hcloud.Server{
-        Name: name,
+        ID: id,
     }
     _, err := hetzner.Client.Server.Delete(context.Background(), server)
     if err != nil {
