@@ -5,14 +5,15 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
+	"time"
+
 	// "time"
-    // "io/ioutil"
+	// "io/ioutil"
 
 	"github.com/hetznercloud/hcloud-go/hcloud"
 	"github.com/nu7hatch/gouuid"
-    // "github.com/sfreiberg/simplessh"
-    // "golang.org/x/crypto/ssh"
+	// "github.com/sfreiberg/simplessh"
+	// "golang.org/x/crypto/ssh"
 )
 
 type Hetzner struct {
@@ -27,67 +28,6 @@ func HetznerSetup() *Hetzner {
         ),
     )
     return &Hetzner{Client: client} 
-}
-
-func InitNode(response hcloud.ServerCreateResult, joinCommand string) {
-    cmd := fmt.Sprintf("ssh -i /etc/ssh-key/private-key %s -o StrictHostKeyChecking=no 'bash <(curl -s https://raw.githubusercontent.com/JElgar/auto-q8s/main/apps/scaler/init_worker.sh)'", response.Server.PublicNet.IPv4.IP.String())
-    out, err := exec.Command("bash", "-c", cmd).Output()
-    if err != nil {
-        log.Println("Something went wrong")
-        log.Println(err)
-    }
-    fmt.Println(out)
-    // time.Sleep(time.Second * 20)
-    // fmt.Println("The private key is: ")
-    // fmt.Println(os.Getenv("SSH_PRIVATE_KEY"))
-
-    // key, err := ioutil.ReadFile("/etc/ssh-key/private-key")
-    // fmt.Println("Read private key from file: ")
-    // fmt.Println(key)
-    // if err != nil {
-    //     log.Println(err)
-    //     log.Fatalln("Failed to open private key file")
-    // }
-    // // key := []byte(os.Getenv("SSH_PRIVATE_KEY"))
-
-    // signer, err := ssh.ParsePrivateKey(key)
-	// if err != nil {
-	// 	log.Fatalf("unable to parse private key: %v", err)
-	// }
-    // fmt.Println("Done signer")
-
-	// config := &ssh.ClientConfig{
-	// 	User: "root",
-	// 	Auth: []ssh.AuthMethod{
-	// 		// Add in password check here for moar security.
-	// 		ssh.PublicKeys(signer),
-	// 	},
-	// 	HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-    // }
-
-    // host := response.Server.PublicNet.IPv4.IP.String()
-    // port := "22"
-    // client, err := ssh.Dial("tcp", host+":"+port, config)
-    // if err != nil {
-    //     log.Println(err)
-	// 	log.Fatal("unable to dial", err)
-    // }
-
-    // defer client.Close()
-    // fmt.Println("Created clinet")
-
-	// session, err := client.NewSession()
-	// if err != nil {
-	// 	log.Fatal("unable to create SSH session: ", err)
-    // }
-    // defer session.Close()
-    // fmt.Println("Created session")
-
-    // session.Run("bash <(curl -s https://raw.githubusercontent.com/JElgar/auto-q8s/main/apps/scaler/init_worker.sh)"); 
-    // fmt.Println("Ran init")
-   
-    // session.Run(joinCommand); 
-    // fmt.Println("Ran join")
 }
 
 func (hetzner *Hetzner) GetSshKeyId() (*hcloud.SSHKey, error) {
@@ -119,7 +59,7 @@ func (hetzner *Hetzner) CreateNode(joinCommand string) {
         Image: &hcloud.Image{Name: "ubuntu-20.04"},
         ServerType: &hcloud.ServerType{Name: "cx11"},
         SSHKeys: sshKeys,
-        UserData: fmt.Sprintf("#cloud-config\nruncmd:\n- touch test-cloudinit.txt\n- curl -s https://raw.githubusercontent.com/JElgar/auto-q8s/main/apps/scaler/init_worker.sh -o init.sh\n- chmod +x init.sh\n- ./init.sh\n- %s", joinCommand), 
+        UserData: fmt.Sprintf("#cloud-config\nruncmd:\n- touch test-cloudinit.txt\n- curl -s https://raw.githubusercontent.com/JElgar/auto-q8s/main/apps/scaler/init_worker.sh -o init.sh\n- chmod +x init.sh\n- ./init.sh\n- echo '%s' > join.sh\n- chmod +x join.sh\n- ./join.sh > join_output.txt", joinCommand), 
     }
     response, _, err := hetzner.Client.Server.Create(context.Background(), options)
     if err != nil {
@@ -130,27 +70,26 @@ func (hetzner *Hetzner) CreateNode(joinCommand string) {
     log.Println("Node created")
     log.Println(response)
     // InitNode(response, joinCommand)
-   
-    actions := response.NextActions
+  
+    // Wait till server is started 
     for {
-        for _, action := range actions {
-            action = hetzner.GetAction(action.ID)
-            log.Println("Command: ")
-            log.Println(action.Command)
-            if action.Status == hcloud.ActionStatusRunning {
-                fmt.Println("Running")
-            } else if action.Status == hcloud.ActionStatusError {
-                fmt.Println("Error")
-                fmt.Println(action.ErrorMessage)
-                fmt.Println(action.ErrorCode)
-                break
-            } else if action.Status == hcloud.ActionStatusSuccess {
-                fmt.Println("Success")
-                break
-            } else {
-                fmt.Println("Unknown status")
-            }
+        action := hetzner.GetAction(response.Action.ID)
+        log.Println("Command: ")
+        log.Println(action.Command)
+        if action.Status == hcloud.ActionStatusRunning {
+            log.Println("Running")
+        } else if action.Status == hcloud.ActionStatusError {
+            log.Println("Error")
+            log.Println(action.ErrorMessage)
+            log.Println(action.ErrorCode)
+            break
+        } else if action.Status == hcloud.ActionStatusSuccess {
+            log.Println("Success")
+            break
+        } else {
+            log.Println("Unknown status")
         }
+        time.Sleep(time.Second * 10)
     }  
 }
 
