@@ -33,7 +33,8 @@ func main() {
     // Do k8s stuff
     for {
         log.Printf("Checking")
-        currentNumberOfNodes := env.K8s.GetNodeCount()
+        // currentNumberOfNodes := env.K8s.GetNodeCount()
+        currentNumberOfNodes := len(env.Hetzner.GetNodes()) 
         lengthOfQueue := env.Rmq.QueueLength()
     
         numberOfNodesToMake := int(math.Ceil(float64(lengthOfQueue) / float64(100))) - currentNumberOfNodes
