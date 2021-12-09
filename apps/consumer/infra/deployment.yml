@@ -36,6 +36,8 @@ spec:
             - name: RMQ_PORT
               value: "5672"
             - name: AWS_ACCESS_KEY_ID
-              value: $AWS_ACCESS_KEY_ID
+              value: "$AWS_ACCESS_KEY_ID"
             - name: AWS_SECRET_ACCESS_KEY 
-              value: $AWS_SECRET_ACCESS_KEY
+              value: "$AWS_SECRET_ACCESS_KEY"
+            - name: DYNAMO_TABLE
+              value: "$DYNAMO_TABLE"

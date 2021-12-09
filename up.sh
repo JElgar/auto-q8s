@@ -8,6 +8,7 @@ ansible-playbook -i ansible_setup/inventory.ini ansible_setup/site.yml --user ro
 export CLUSTER_BASE_URL=$(pulumi stack -C infra output base_url)
 export CLUSTER_LOAD_BALANCER_IP=$(pulumi stack -C infra output master-node-0_ip)
 export JOIN_COMMAND=$(cat ansible_setup/join_command)
+export DYNAMO_TABLE=$(pulumi stack -C infra output table_name) 
 
 cd k8s
 ./init.sh

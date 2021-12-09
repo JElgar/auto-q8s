@@ -40,10 +40,11 @@ func main() {
         log.Printf("Done work on: %s", d.Body)
         rmq.Channel.Ack(d.DeliveryTag, false)
 
-        var item *services.ResultItem
-        json.Unmarshal(d.Body, item)
+        var item services.ResultItem
+        json.Unmarshal(d.Body, &item)
 
-        item.Status = "DONE"
-        dynamo.PutItem(item)
+        item.Status = "COMPLETED"
+        item.CompletedAt = time.Now()  
+        dynamo.PutItem(&item)
     }
 }

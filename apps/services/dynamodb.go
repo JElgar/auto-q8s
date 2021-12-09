@@ -1,14 +1,17 @@
 package services
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 
 	"log"
+	"time"
 )
 
 type Dynamo struct {
@@ -17,15 +20,22 @@ type Dynamo struct {
 }
 
 type ResultItem struct {
-	ID		string
-    Status	string
+	ID		string `json:"id"`
+	Status	string `json:"status"`
+	CompletedAt time.Time `json:"completed_at"`
 }
 
 
 func InitDynamo() *Dynamo {
-	sess := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
+	sess, err := session.NewSession(
+		&aws.Config{
+			Region: aws.String("eu-west-2"),
+			Credentials: credentials.NewEnvCredentials(),
+		},
+	)
+	if err != nil {
+		log.Fatalf("Failed to connect to aws")
+	} 
 
 	dbSession := dynamodb.New(sess)
 	return &Dynamo{
@@ -40,6 +50,8 @@ func (dynamo *Dynamo) PutItem(item *ResultItem) {
 		log.Fatalf("Failed to marshall item %s", err)
 	}
 
+	fmt.Println("Putting item: ")
+	fmt.Println(item)
 	_, err = dynamo.Session.PutItem(
 		&dynamodb.PutItemInput{
 			Item:      attr,

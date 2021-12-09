@@ -99,3 +99,4 @@ resolver = appsync.Resolver(
 
 pulumi.export("api_endpoint", api.uris["GRAPHQL"])
 pulumi.export("api_key", key.key)
+pulumi.export("table_name", table.name)
