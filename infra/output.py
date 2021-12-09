@@ -56,12 +56,12 @@ attachment = iam.RolePolicyAttachment(
 
 schema = """
 type Query {
-        result(id: ID!): Result
         results: [Result]
     }
     type Result {
         id: ID!
         status: String
+        completedAt: AWSDateTime
     }
     schema {
         query: Query
