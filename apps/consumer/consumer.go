@@ -46,7 +46,7 @@ func main() {
         item.Status = "COMPLETED"
         item.CompletedAt = time.Now()  
 
-        if item.ID != nil {
+        if item.ID != "" {
             dynamo.PutItem(&item)
         }
     }
