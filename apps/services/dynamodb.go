@@ -12,7 +12,7 @@ import (
 )
 
 type Dynamo struct {
-	Session dynamodb.Session
+	Session *dynamodb.DynamoDB
 	tableName string
 }
 
@@ -27,9 +27,9 @@ func InitDynamo() *Dynamo {
 		SharedConfigState: session.SharedConfigEnable,
 	}))
 
-	session := dynamodb.New(sess)
+	dbSession := dynamodb.New(sess)
 	return &Dynamo{
-		Session: session,
+		Session: dbSession,
 		tableName: os.Getenv("DYNAMO_TABLE"),
 	}
 } 
@@ -40,7 +40,13 @@ func (dynamo *Dynamo) PutItem(item *ResultItem) {
 		log.Fatalf("Failed to marshall item %s", err)
 	}
 
-	_, err = dynamo.Session.PutItem(attr)
+	_, err = dynamo.Session.PutItem(
+		&dynamodb.PutItemInput{
+			Item:      attr,
+			TableName: aws.String(dynamo.tableName),
+		},
+	)
+
 	if err != nil {
 		log.Fatalf("Failed to put item in table %s", err)
 	}
