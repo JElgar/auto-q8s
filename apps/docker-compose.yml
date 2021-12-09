@@ -41,6 +41,23 @@ services:
     depends_on:
       - rabbitmq
   
+  metrics:
+    build:
+      context: .
+      dockerfile: metrics/Dockerfile
+    env_file:
+      - ../.env
+    networks:
+      - rabbitmq
+    environment:
+      - RMQ_USER=guest
+      - RMQ_PASSWORD=guest
+      - RMQ_HOST=rabbitmq
+      - RMQ_PORT=5672
+      - DYNAMO_TABLE=outputs-82168b4
+    depends_on:
+      - rabbitmq
+  
   scaler:
     build:
       context: .
