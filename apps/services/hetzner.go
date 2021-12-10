@@ -75,25 +75,25 @@ func (hetzner *Hetzner) CreateNode(joinCommand string) {
     // InitNode(response, joinCommand)
   
     // Wait till server is started 
-    for {
-        action := hetzner.GetAction(response.Action.ID)
-        log.Println("Command: ")
-        log.Println(action.Command)
-        if action.Status == hcloud.ActionStatusRunning {
-            log.Println("Running")
-        } else if action.Status == hcloud.ActionStatusError {
-            log.Println("Error")
-            log.Println(action.ErrorMessage)
-            log.Println(action.ErrorCode)
-            break
-        } else if action.Status == hcloud.ActionStatusSuccess {
-            log.Println("Success")
-            break
-        } else {
-            log.Println("Unknown status")
-        }
-        time.Sleep(time.Second * 10)
-    }  
+    // for {
+    //     action := hetzner.GetAction(response.Action.ID)
+    //     log.Println("Command: ")
+    //     log.Println(action.Command)
+    //     if action.Status == hcloud.ActionStatusRunning {
+    //         log.Println("Running")
+    //     } else if action.Status == hcloud.ActionStatusError {
+    //         log.Println("Error")
+    //         log.Println(action.ErrorMessage)
+    //         log.Println(action.ErrorCode)
+    //         break
+    //     } else if action.Status == hcloud.ActionStatusSuccess {
+    //         log.Println("Success")
+    //         break
+    //     } else {
+    //         log.Println("Unknown status")
+    //     }
+    //     time.Sleep(time.Second * 10)
+    // }  
 }
 
 func (hetzner *Hetzner) GetAction(actionId int) *hcloud.Action {
