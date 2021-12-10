@@ -62,7 +62,17 @@ func main() {
             fmt.Printf("Need to delete nodes")
             // If we want to delete 4 nodes we should actually just delete one.
             // So we add +3(for master nodes) and negate the value
-            k8sEnv.DeleteNodes(-(numberOfNodesToMake + 3), hetzner)
+            numberOfNodesToDelete := -(numberOfNodesToMake + 3)
+
+            workerNodes := env.Hetzner.GetWorkerNodes()[:numberOfNodesToDelete]
+	        for _, node := range workerNodes {
+                k8sNode := env.K8s.GetNodeByName(node.Name)
+                if k8sNode != nil {
+                    k8sEnv.DeleteNode(*k8sNode, hetzner)
+                } else {
+                    hetzner.DeleteNode(node.ID)
+                }
+	        }
         }
        
         // Wait till all new nodes have initalised

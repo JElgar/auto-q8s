@@ -45,6 +45,17 @@ func (env K8sEnv) GetNodes() []apiv1.Node {
 }
 
 
+func (env K8sEnv) GetNodeByName(name string) *apiv1.Node {
+	nodes := env.GetNodes()
+	for _, node := range nodes {
+		if node.Name == name {
+			return &node 
+		}
+	}
+	return nil
+}
+
+
 func (env K8sEnv) GetWorkerNodes() []apiv1.Node {
 	nodes := env.GetNodes() 
 

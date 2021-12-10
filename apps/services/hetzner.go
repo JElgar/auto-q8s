@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	// "time"
@@ -112,6 +113,19 @@ func (hetzner *Hetzner) GetNodes() ([]*hcloud.Server) {
         return []*hcloud.Server{}
     }
     return nodes
+}
+
+
+func (hetzner *Hetzner) GetWorkerNodes() ([]*hcloud.Server) {
+    nodes := hetzner.GetNodes() 
+
+	var workerNodes []*hcloud.Server
+    for _, node := range nodes {
+        if strings.Contains(node.Name, "worker") {
+            workerNodes = append(workerNodes, node)
+        }
+    }
+    return workerNodes 
 }
 
 func (hetzner *Hetzner) GetNodeByIp(ip string) *hcloud.Server {
