@@ -39,7 +39,7 @@ func main() {
     
         numberOfNodesToMake := int(math.Ceil(float64(lengthOfQueue) / float64(100))) - currentNumberOfNodes
         deploymentSize := int(math.Max(math.Ceil(float64(lengthOfQueue) / float64(10)), float64(3)))
-        if numberOfNodesToMake > 10 {
+        if numberOfNodesToMake > 50 {
             log.Panicf("Cannot create %d!", numberOfNodesToMake)
         }
         log.Printf("Number of nodes in cluster: %d", currentNumberOfNodes)
