@@ -8,13 +8,13 @@ Requirements:
 - pulumi
 - kubectl
 - istioctl
+- ansible
 
-Create a .env file with the following values:
+For development:
+- docker
+- docker-compose
 
-```
-CLOUDFLARE_API_TOKEN= # Token from cloudflare
-HCLOUD_TOKEN= # Token from hetzner 
-```
+Create a .env file with envrionment varaible matching those in .env.example
 
 To deploy infra, install k8s and deploy resources run
 
@@ -33,3 +33,35 @@ To destroy run
 ```
 make down
 ```
+
+## Services
+
+Defore deploying any services you must set your environment varaibles, run the following at the root of the project.
+
+```
+export $(grep -v '^#' .env | xargs -d '\n')
+export CLUSTER_BASE_URL=$(pulumi stack -C infra output base_url)
+export CLUSTER_LOAD_BALANCER_IP=$(pulumi stack -C infra output master-node-0_ip)
+export JOIN_COMMAND=$(cat ansible_setup/join_command)
+export DYNAMO_TABLE=$(pulumi stack -C infra output table_name)
+```
+
+### Rabbitmq
+
+To deploy a queue to the cluster go into k8s/rabbitmq and run the init.sh script
+
+### Scaler 
+
+To deploy the scaler to the cluster go into apps/scaler/infra and run the init.sh script
+
+### Producer
+
+To deploy the producer to the cluster go into apps/producer/infra and run the init.sh script
+
+### Consumer 
+
+To deploy the cosumer to the cluster go into apps/consumer/infra and run the init.sh script
+
+### Metrics 
+
+To deploy the metrics service to the cluster go into apps/metrics/infra and run the init.sh script

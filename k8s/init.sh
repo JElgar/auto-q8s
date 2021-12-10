@@ -47,7 +47,3 @@ kubectl create secret generic sshkey --from-file=private-key=/home/$USER/.ssh/id
 
 # Allow default to do admin things
 kubectl create clusterrolebinding default-admin --clusterrole=cluster-admin --serviceaccount=default:default
-
-./rabbitmq/init.sh
-../apps/producer/infra/init.sh
-../apps/scaler/infra/init.sh
