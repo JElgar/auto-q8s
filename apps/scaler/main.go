@@ -46,6 +46,8 @@ func main() {
         log.Printf("Number of items in queue: %d", lengthOfQueue)
         log.Printf("Number of nodes to create: %d", numberOfNodesToMake)
 
+        env.K8s.ScaleDeployment(deploymentSize, "consumer-deployment")
+
         var wg sync.WaitGroup
         if numberOfNodesToMake > 0 {
             wg.Add(numberOfNodesToMake)
@@ -79,8 +81,6 @@ func main() {
         log.Print("Waiting for nodes to be created and inited")
         wg.Wait()
         log.Println("Done")
-
-        env.K8s.ScaleDeployment(deploymentSize, "consumer-deployment")
 
         delay, err := strconv.Atoi(os.Getenv("CHECK_DELAY"))
         if err == nil {
