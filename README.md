@@ -10,7 +10,8 @@ Requirements:
 - istioctl
 - ansible
 
-For development:
+Additional requirements for development:
+
 - docker
 - docker-compose
 
