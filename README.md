@@ -1,4 +1,4 @@
-# auto-q8s
+# Quebernetes
 
 ## Setup
 
